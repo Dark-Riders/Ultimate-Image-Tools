@@ -33,6 +33,11 @@ const creator = {
     borderRotate: 0,
     borderFlipH: false,
     borderFlipV: false,
+    // Custom images
+    images: [],
+    // Store name position (free move)
+    storeNameX: null,
+    storeNameY: null,
 };
 
 const POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'bottom-center', 'top-center'];
@@ -187,13 +192,27 @@ btnExport.addEventListener('click', () => {
 
 // ===== Badge Management =====
 btnAddBadge.addEventListener('click', () => {
-    creator.badges.push({ emoji: '', text: '', color: '#d62828', position: 'bottom-center' });
+    creator.badges.push({ emoji: '', text: '', color: '#d62828', x: 10, y: SIZE - 50 });
     renderBadgeControls();
     render();
 });
 
+function positionToXY(position) {
+    const m = 10;
+    switch (position) {
+        case 'top-left': return { x: m, y: m };
+        case 'top-right': return { x: SIZE - 200, y: m };
+        case 'top-center': return { x: SIZE / 2 - 100, y: m };
+        case 'bottom-left': return { x: m, y: SIZE - 50 };
+        case 'bottom-right': return { x: SIZE - 200, y: SIZE - 50 };
+        case 'bottom-center': return { x: SIZE / 2 - 100, y: SIZE - 50 };
+        default: return { x: m, y: SIZE - 50 };
+    }
+}
+
 function addPresetBadge(preset) {
-    creator.badges.push({ ...preset });
+    const pos = positionToXY(preset.position);
+    creator.badges.push({ emoji: preset.emoji, text: preset.text, color: preset.color, x: pos.x, y: pos.y });
     renderBadgeControls();
     render();
 }
@@ -221,15 +240,11 @@ function renderBadgeControls() {
       <input type="text" class="badge-emoji-input" value="${badge.emoji}" title="Emoji" maxlength="4">
       <input type="text" class="badge-text-input" value="${badge.text}" placeholder="Badge text">
       <input type="color" class="badge-color-input" value="${badge.color}" title="Badge color">
-      <select class="badge-pos-select">
-        ${POSITIONS.map(p => `<option value="${p}" ${p === badge.position ? 'selected' : ''}>${p.replace('-', ' ')}</option>`).join('')}
-      </select>
       <button class="badge-remove" title="Remove">✕</button>
     `;
         row.querySelector('.badge-emoji-input').addEventListener('input', e => { creator.badges[i].emoji = e.target.value; render(); });
         row.querySelector('.badge-text-input').addEventListener('input', e => { creator.badges[i].text = e.target.value; render(); });
         row.querySelector('.badge-color-input').addEventListener('input', e => { creator.badges[i].color = e.target.value; render(); });
-        row.querySelector('.badge-pos-select').addEventListener('change', e => { creator.badges[i].position = e.target.value; render(); });
         row.querySelector('.badge-remove').addEventListener('click', () => { creator.badges.splice(i, 1); renderBadgeControls(); render(); });
         badgeListEl.appendChild(row);
     });
@@ -511,6 +526,7 @@ function render() {
         ctx.restore();
     }
 
+    drawCustomImages();
     drawAllBadges();
     if (creator.storeName) drawStoreName();
 }
@@ -1539,16 +1555,24 @@ function drawRibbon(t, fill, accent) {
     }
 }
 
+// ===== Draw Custom Images =====
+function drawCustomImages() {
+    creator.images.forEach(img => {
+        if (!img.el) return;
+        ctx.drawImage(img.el, img.x, img.y, img.w, img.h);
+    });
+}
+
 // ===== Styled Badges =====
 function drawAllBadges() {
     creator.badges.forEach(badge => {
         if (!badge.text) return;
         const label = badge.emoji ? `${badge.emoji} ${badge.text}` : badge.text;
-        drawBadgeAt(label, badge.color, badge.position);
+        drawBadgeAt(label, badge.color, badge.x, badge.y);
     });
 }
 
-function drawBadgeAt(text, bgColor, position) {
+function drawBadgeAt(text, bgColor, bx, by) {
     const fx = getStyleFx();
     const fontSize = creator.badgeSize;
     ctx.font = getBadgeFont();
@@ -1556,19 +1580,7 @@ function drawBadgeAt(text, bgColor, position) {
     const pad = fontSize * 0.7;
     const w = metrics.width + pad * 2;
     const h = fontSize * 2.1;
-    const margin = 10;
     const r = fx.badgeRadius;
-    let bx, by;
-
-    switch (position) {
-        case 'top-left': bx = margin; by = margin; break;
-        case 'top-right': bx = SIZE - w - margin; by = margin; break;
-        case 'top-center': bx = (SIZE - w) / 2; by = margin; break;
-        case 'bottom-left': bx = margin; by = SIZE - h - margin; break;
-        case 'bottom-right': bx = SIZE - w - margin; by = SIZE - h - margin; break;
-        case 'bottom-center': bx = (SIZE - w) / 2; by = SIZE - h - margin; break;
-        default: bx = margin; by = SIZE - h - margin;
-    }
 
     ctx.save();
 
@@ -1629,8 +1641,10 @@ function drawStoreName() {
     const pad = creator.storeSize * 0.9;
     const w = metrics.width + pad * 2;
     const h = creator.storeSize * 1.7;
-    const bx = (SIZE - w) / 2;
-    const by = creator.thickness * (fx.borderExtraThickness) + 8;
+    const defaultX = (SIZE - w) / 2;
+    const defaultY = creator.thickness * (fx.borderExtraThickness) + 8;
+    const bx = creator.storeNameX !== null ? creator.storeNameX : defaultX;
+    const by = creator.storeNameY !== null ? creator.storeNameY : defaultY;
     const r = fx.badgeRadius;
 
     ctx.save();
@@ -1712,6 +1726,149 @@ document.getElementById('flip-v-btn')?.addEventListener('click', function() {
     this.classList.toggle('active');
     render();
 });
+
+// ===== Canvas Drag-and-Drop =====
+let dragTarget = null;
+let dragOffsetX = 0, dragOffsetY = 0;
+
+function canvasToLogical(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = SIZE / rect.width;
+    const scaleY = SIZE / rect.height;
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+}
+
+function getHitTarget(mx, my) {
+    // Check images (reverse order = top-most first)
+    for (let i = creator.images.length - 1; i >= 0; i--) {
+        const img = creator.images[i];
+        if (mx >= img.x && mx <= img.x + img.w && my >= img.y && my <= img.y + img.h) {
+            return { type: 'image', index: i, obj: img };
+        }
+    }
+    // Check badges
+    ctx.font = getBadgeFont();
+    for (let i = creator.badges.length - 1; i >= 0; i--) {
+        const b = creator.badges[i];
+        if (!b.text) continue;
+        const label = b.emoji ? `${b.emoji} ${b.text}` : b.text;
+        const pad = creator.badgeSize * 0.7;
+        const w = ctx.measureText(label).width + pad * 2;
+        const h = creator.badgeSize * 2.1;
+        if (mx >= b.x && mx <= b.x + w && my >= b.y && my <= b.y + h) {
+            return { type: 'badge', index: i, obj: b };
+        }
+    }
+    // Check store name
+    if (creator.storeName) {
+        const fx = getStyleFx();
+        ctx.font = getStoreFont();
+        const text = creator.storeName.toUpperCase();
+        const pad = creator.storeSize * 0.9;
+        const w = ctx.measureText(text).width + pad * 2;
+        const h = creator.storeSize * 1.7;
+        const sx = creator.storeNameX !== null ? creator.storeNameX : (SIZE - w) / 2;
+        const sy = creator.storeNameY !== null ? creator.storeNameY : creator.thickness * fx.borderExtraThickness + 8;
+        if (mx >= sx && mx <= sx + w && my >= sy && my <= sy + h) {
+            return { type: 'storeName', obj: { x: sx, y: sy, w, h } };
+        }
+    }
+    return null;
+}
+
+canvas.addEventListener('mousedown', e => {
+    const { x, y } = canvasToLogical(e);
+    const hit = getHitTarget(x, y);
+    if (hit) {
+        dragTarget = hit;
+        dragOffsetX = x - hit.obj.x;
+        dragOffsetY = y - hit.obj.y;
+        canvas.style.cursor = 'grabbing';
+        e.preventDefault();
+    }
+});
+
+canvas.addEventListener('mousemove', e => {
+    const { x, y } = canvasToLogical(e);
+    if (dragTarget) {
+        const nx = x - dragOffsetX;
+        const ny = y - dragOffsetY;
+        if (dragTarget.type === 'badge') {
+            creator.badges[dragTarget.index].x = nx;
+            creator.badges[dragTarget.index].y = ny;
+        } else if (dragTarget.type === 'image') {
+            creator.images[dragTarget.index].x = nx;
+            creator.images[dragTarget.index].y = ny;
+        } else if (dragTarget.type === 'storeName') {
+            creator.storeNameX = nx;
+            creator.storeNameY = ny;
+        }
+        render();
+    } else {
+        canvas.style.cursor = getHitTarget(x, y) ? 'grab' : 'default';
+    }
+});
+
+canvas.addEventListener('mouseup', () => {
+    if (dragTarget) {
+        dragTarget = null;
+        canvas.style.cursor = 'grab';
+    }
+});
+
+canvas.addEventListener('mouseleave', () => {
+    if (dragTarget) { dragTarget = null; canvas.style.cursor = 'default'; }
+});
+
+// ===== Custom Image Upload =====
+const imageUploadInput = document.getElementById('image-upload');
+const imageListEl = document.getElementById('image-list');
+
+document.getElementById('btn-add-image').addEventListener('click', () => {
+    imageUploadInput.click();
+});
+
+imageUploadInput.addEventListener('change', e => {
+    Array.from(e.target.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+                // Scale to fit within 150px default size
+                const maxDim = 150;
+                let w = img.width, h = img.height;
+                if (w > h) { h = (h / w) * maxDim; w = maxDim; }
+                else { w = (w / h) * maxDim; h = maxDim; }
+                creator.images.push({ el: img, x: SIZE / 2 - w / 2, y: SIZE / 2 - h / 2, w, h, name: file.name });
+                renderImageList();
+                render();
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+});
+
+function renderImageList() {
+    imageListEl.innerHTML = '';
+    creator.images.forEach((img, i) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)';
+        row.innerHTML = `
+            <span style="flex:1;font-size:11px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.name || 'Image ' + (i + 1)}</span>
+            <label style="font-size:10px;color:var(--text-muted)">W</label>
+            <input type="number" class="img-w" value="${Math.round(img.w)}" style="width:45px;padding:2px 4px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:11px">
+            <label style="font-size:10px;color:var(--text-muted)">H</label>
+            <input type="number" class="img-h" value="${Math.round(img.h)}" style="width:45px;padding:2px 4px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:11px">
+            <button class="badge-remove img-del" title="Remove">✕</button>
+        `;
+        row.querySelector('.img-w').addEventListener('change', e => { creator.images[i].w = parseInt(e.target.value) || 50; render(); });
+        row.querySelector('.img-h').addEventListener('change', e => { creator.images[i].h = parseInt(e.target.value) || 50; render(); });
+        row.querySelector('.img-del').addEventListener('click', () => { creator.images.splice(i, 1); renderImageList(); render(); });
+        imageListEl.appendChild(row);
+    });
+}
 
 // Initial render
 render();
