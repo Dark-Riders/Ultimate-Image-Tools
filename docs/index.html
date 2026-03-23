@@ -11,6 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Poppins:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Montserrat:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700&family=Oswald:wght@400;500;600;700&family=Bebas+Neue&family=Anton&family=Permanent+Marker&family=Bangers&family=Righteous&family=Fredoka+One&family=Luckiest+Guy&family=Passion+One:wght@400;700;900&family=Russo+One&family=Black+Ops+One&family=Bungee&family=Lilita+One&family=Fugaz+One&family=Pacifico&family=Lobster&family=Satisfy&family=Dancing+Script:wght@400;700&family=Caveat:wght@400;700&family=Press+Start+2P&family=Silkscreen&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Archivo+Black&display=swap"
     rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -534,6 +535,62 @@
           </div>
           <p style="font-size:11px;color:var(--text-muted);margin:0 0 6px">Drag images & badges on the preview to reposition them</p>
           <div id="image-list" style="display:flex;flex-direction:column;gap:4px"></div>
+        </section>
+
+        <!-- QR Code Badge -->
+        <section class="section">
+          <div class="section-header">
+            <h2>QR Code</h2>
+          </div>
+          <input type="text" id="cr-qr-url" class="badge-text-input" placeholder="Enter URL (e.g. https://shopee.co.id/mystore)" style="width:100%;margin-bottom:6px;box-sizing:border-box">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+            <label style="font-size:11px;color:var(--text-muted)">Size <span id="cr-qr-size-val">120</span>px</label>
+            <input type="range" id="cr-qr-size" min="40" max="300" value="120" style="flex:1;accent-color:var(--primary)">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+            <label class="color-field" style="margin:0">
+              <span style="font-size:11px">FG</span>
+              <input type="color" id="cr-qr-fg" value="#000000">
+            </label>
+            <label class="color-field" style="margin:0">
+              <span style="font-size:11px">BG</span>
+              <input type="color" id="cr-qr-bg" value="#ffffff">
+            </label>
+          </div>
+        </section>
+
+        <!-- Diagonal Text Watermark -->
+        <section class="section">
+          <div class="section-header">
+            <h2>Diagonal Text</h2>
+          </div>
+          <input type="text" id="cr-diag-text" class="badge-text-input" placeholder="e.g. ORIGINAL or Shop Name" style="width:100%;margin-bottom:6px;box-sizing:border-box">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+            <label style="font-size:11px;color:var(--text-muted);min-width:70px">Opacity <span id="cr-diag-opacity-val">15</span>%</label>
+            <input type="range" id="cr-diag-opacity" min="3" max="60" value="15" style="flex:1;accent-color:var(--primary)">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+            <label style="font-size:11px;color:var(--text-muted);min-width:70px">Size <span id="cr-diag-size-val">32</span>px</label>
+            <input type="range" id="cr-diag-size" min="12" max="80" value="32" style="flex:1;accent-color:var(--primary)">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+            <label style="font-size:11px;color:var(--text-muted);min-width:70px">Angle</label>
+            <select id="cr-diag-angle" class="style-select" style="flex:1">
+              <option value="-45">-45° ↗</option>
+              <option value="-30">-30°</option>
+              <option value="-15">-15°</option>
+              <option value="0">0° →</option>
+              <option value="15">15°</option>
+              <option value="30">30°</option>
+              <option value="45">45° ↘</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label class="color-field" style="margin:0">
+              <span style="font-size:11px">Color</span>
+              <input type="color" id="cr-diag-color" value="#ffffff">
+            </label>
+          </div>
         </section>
 
         <!-- Export -->

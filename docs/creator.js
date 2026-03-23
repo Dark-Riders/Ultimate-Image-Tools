@@ -92,6 +92,20 @@ const creator = {
     // Store name position (free move)
     storeNameX: null,
     storeNameY: null,
+    // QR Code
+    qrUrl: '',
+    qrSize: 120,
+    qrFg: '#000000',
+    qrBg: '#ffffff',
+    qrX: null,
+    qrY: null,
+    qrImage: null,
+    // Diagonal text
+    diagText: '',
+    diagOpacity: 15,
+    diagSize: 32,
+    diagAngle: -45,
+    diagColor: '#ffffff',
 };
 
 const POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'bottom-center', 'top-center'];
@@ -600,6 +614,8 @@ function render() {
     drawCustomImages();
     drawAllBadges();
     if (creator.storeName) drawStoreName();
+    if (creator.qrImage) drawQRCode();
+    if (creator.diagText) drawDiagonalText();
 
     // Draw selection highlight
     if (selectedElement) {
@@ -626,6 +642,10 @@ function render() {
             sh = creator.storeSize * 1.7;
             sx = creator.storeNameX !== null ? creator.storeNameX : (SIZE - sw) / 2;
             sy = creator.storeNameY !== null ? creator.storeNameY : creator.thickness * fx.borderExtraThickness + 8;
+        } else if (selectedElement.type === 'qr' && creator.qrImage) {
+            sx = creator.qrX !== null ? creator.qrX : SIZE - creator.qrSize - 20;
+            sy = creator.qrY !== null ? creator.qrY : SIZE - creator.qrSize - 20;
+            sw = creator.qrSize; sh = creator.qrSize;
         }
         if (sx !== undefined) {
             ctx.save();
@@ -1815,6 +1835,68 @@ function roundRect(ctx, x, y, w, h, r) {
     ctx.closePath();
 }
 
+// ===== QR Code =====
+function generateQR() {
+    if (!creator.qrUrl) { creator.qrImage = null; render(); return; }
+    try {
+        const qr = qrcode(0, 'M');
+        qr.addData(creator.qrUrl);
+        qr.make();
+        const moduleCount = qr.getModuleCount();
+        const cellSize = 10;
+        const qCanvas = document.createElement('canvas');
+        qCanvas.width = moduleCount * cellSize;
+        qCanvas.height = moduleCount * cellSize;
+        const qCtx = qCanvas.getContext('2d');
+        qCtx.fillStyle = creator.qrBg;
+        qCtx.fillRect(0, 0, qCanvas.width, qCanvas.height);
+        qCtx.fillStyle = creator.qrFg;
+        for (let r = 0; r < moduleCount; r++) {
+            for (let c = 0; c < moduleCount; c++) {
+                if (qr.isDark(r, c)) qCtx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+            }
+        }
+        const img = new Image();
+        img.onload = () => { creator.qrImage = img; render(); };
+        img.src = qCanvas.toDataURL();
+        if (creator.qrX === null) { creator.qrX = SIZE - creator.qrSize - 20; creator.qrY = SIZE - creator.qrSize - 20; }
+    } catch (e) { creator.qrImage = null; render(); }
+}
+
+function drawQRCode() {
+    if (!creator.qrImage) return;
+    const x = creator.qrX !== null ? creator.qrX : SIZE - creator.qrSize - 20;
+    const y = creator.qrY !== null ? creator.qrY : SIZE - creator.qrSize - 20;
+    ctx.drawImage(creator.qrImage, x, y, creator.qrSize, creator.qrSize);
+}
+
+// ===== Diagonal Text Watermark =====
+function drawDiagonalText() {
+    if (!creator.diagText) return;
+    ctx.save();
+    ctx.globalAlpha = creator.diagOpacity / 100;
+    ctx.fillStyle = creator.diagColor;
+    ctx.font = `700 ${creator.diagSize}px 'Inter', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const angle = creator.diagAngle * Math.PI / 180;
+    const text = creator.diagText.toUpperCase();
+    const spacing = creator.diagSize * 5;
+    const diag = Math.sqrt(SIZE * SIZE * 2) * 1.5;
+
+    ctx.translate(SIZE / 2, SIZE / 2);
+    ctx.rotate(angle);
+
+    for (let y = -diag / 2; y < diag / 2; y += spacing) {
+        for (let x = -diag / 2; x < diag / 2; x += ctx.measureText(text).width + creator.diagSize * 3) {
+            ctx.fillText(text, x, y);
+        }
+    }
+
+    ctx.restore();
+}
+
 // ===== Border Transform Controls =====
 document.querySelectorAll('[data-rotate]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1882,6 +1964,14 @@ function getHitTarget(mx, my) {
             return { type: 'storeName', obj: { x: sx, y: sy, w, h } };
         }
     }
+    // Check QR code
+    if (creator.qrImage) {
+        const qx = creator.qrX !== null ? creator.qrX : SIZE - creator.qrSize - 20;
+        const qy = creator.qrY !== null ? creator.qrY : SIZE - creator.qrSize - 20;
+        if (mx >= qx && mx <= qx + creator.qrSize && my >= qy && my <= qy + creator.qrSize) {
+            return { type: 'qr', obj: { x: qx, y: qy } };
+        }
+    }
     return null;
 }
 
@@ -1915,6 +2005,9 @@ canvas.addEventListener('mousemove', e => {
         } else if (dragTarget.type === 'storeName') {
             creator.storeNameX = nx;
             creator.storeNameY = ny;
+        } else if (dragTarget.type === 'qr') {
+            creator.qrX = nx;
+            creator.qrY = ny;
         }
         render();
     } else {
@@ -1948,6 +2041,9 @@ document.addEventListener('keydown', e => {
         } else if (selectedElement.type === 'storeName') {
             creator.storeNameX = null;
             creator.storeNameY = null;
+        } else if (selectedElement.type === 'qr') {
+            creator.qrUrl = '';
+            creator.qrImage = null;
         }
         selectedElement = null;
         render();
@@ -2006,6 +2102,50 @@ function renderImageList() {
         imageListEl.appendChild(row);
     });
 }
+
+// ===== QR Code Controls =====
+const qrUrlInput = document.getElementById('cr-qr-url');
+const qrSizeInput = document.getElementById('cr-qr-size');
+const qrSizeVal = document.getElementById('cr-qr-size-val');
+const qrFgInput = document.getElementById('cr-qr-fg');
+const qrBgInput = document.getElementById('cr-qr-bg');
+
+let qrDebounce;
+qrUrlInput.addEventListener('input', e => {
+    creator.qrUrl = e.target.value;
+    clearTimeout(qrDebounce);
+    qrDebounce = setTimeout(generateQR, 300);
+});
+qrSizeInput.addEventListener('input', e => {
+    creator.qrSize = parseInt(e.target.value);
+    qrSizeVal.textContent = creator.qrSize;
+    render();
+});
+qrFgInput.addEventListener('input', e => { creator.qrFg = e.target.value; generateQR(); });
+qrBgInput.addEventListener('input', e => { creator.qrBg = e.target.value; generateQR(); });
+
+// ===== Diagonal Text Controls =====
+const diagTextInput = document.getElementById('cr-diag-text');
+const diagOpacityInput = document.getElementById('cr-diag-opacity');
+const diagOpacityVal = document.getElementById('cr-diag-opacity-val');
+const diagSizeInput = document.getElementById('cr-diag-size');
+const diagSizeVal = document.getElementById('cr-diag-size-val');
+const diagAngleSelect = document.getElementById('cr-diag-angle');
+const diagColorInput = document.getElementById('cr-diag-color');
+
+diagTextInput.addEventListener('input', e => { creator.diagText = e.target.value; render(); });
+diagOpacityInput.addEventListener('input', e => {
+    creator.diagOpacity = parseInt(e.target.value);
+    diagOpacityVal.textContent = creator.diagOpacity;
+    render();
+});
+diagSizeInput.addEventListener('input', e => {
+    creator.diagSize = parseInt(e.target.value);
+    diagSizeVal.textContent = creator.diagSize;
+    render();
+});
+diagAngleSelect.addEventListener('change', e => { creator.diagAngle = parseInt(e.target.value); render(); });
+diagColorInput.addEventListener('input', e => { creator.diagColor = e.target.value; render(); });
 
 // Initial render
 render();

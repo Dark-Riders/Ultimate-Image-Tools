@@ -15,8 +15,8 @@ Things I'm considering but haven't committed to implementing yet.
 - [ ] **Image Layer Order** — Drag to reorder which images/badges render on top of others (z-index control).
 - [ ] **Badge Shape Options** — Pill, circle, ribbon/banner, star burst shapes instead of just rounded rectangles.
 - [ ] **Snap to Grid / Alignment Guides** — When dragging elements, show alignment guides (center, edges) for precise positioning.
-- [ ] **QR Code Badge** — Generate a QR code linking to your shop URL and place it on the watermark.
-- [ ] **Diagonal Text Watermark** — Add custom transparent text across the image at an angle (e.g. "ORIGINAL", shop name), semi-transparent so it doesn't obstruct the product.
+- [x] **QR Code Badge** — Generate a QR code linking to your shop URL and place it on the watermark.
+- [x] **Diagonal Text Watermark** — Add custom transparent text across the image at an angle (e.g. "ORIGINAL", shop name), semi-transparent so it doesn't obstruct the product.
 
 ## Applier Enhancements
 - [ ] Image resizing before watermark (e.g., resize all to 1000×1000 before applying)
