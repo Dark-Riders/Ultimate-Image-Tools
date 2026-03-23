@@ -478,8 +478,8 @@ function render() {
         rounded: drawRounded, inset: drawInset,
         wavy: drawWavy, scalloped: drawScalloped, zigzag: drawZigzag,
         dotted: drawDotted, filmstrip: drawFilmstrip, ticket: drawTicket,
-        hexagonal: drawHexagonal, crossStitch: drawCrossStitch,
-        tribal: drawTribal, rope: drawRope, diamondGrid: drawDiamondGrid,
+        chain: drawChain, crossStitch: drawCrossStitch,
+        arrow: drawArrow, rope: drawRope, network: drawNetwork,
     };
 
     applyBorderEffects(borderDrawFns[creator.style] || drawSimple);
@@ -746,29 +746,24 @@ function drawTicket(t, fill, accent) {
     });
 }
 
-function drawHexagonal(t, fill, accent) {
-    const cx = SIZE / 2, cy = SIZE / 2;
-    const r = SIZE / 2 - t;
-    ctx.strokeStyle = fill; ctx.lineWidth = t;
-    ctx.beginPath();
-    for (let i = 0; i < 6; i++) {
-        const angle = (Math.PI / 3) * i - Math.PI / 2;
-        const x = cx + r * Math.cos(angle);
-        const y = cy + r * Math.sin(angle);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+function drawChain(t, fill, accent) {
+    // Outer border
+    ctx.strokeStyle = fill; ctx.lineWidth = t * 0.5;
+    ctx.strokeRect(t, t, SIZE - t * 2, SIZE - t * 2);
+    // Chain links along all edges
+    const linkW = t * 2; const linkH = t * 1;
+    const spacing = linkW * 1.6;
+    ctx.strokeStyle = accent; ctx.lineWidth = t * 0.35;
+    for (let pos = spacing; pos < SIZE - spacing; pos += spacing) {
+        // Top edge links
+        ctx.beginPath(); ctx.ellipse(pos, t, linkW / 2, linkH / 2, 0, 0, Math.PI * 2); ctx.stroke();
+        // Bottom edge links
+        ctx.beginPath(); ctx.ellipse(pos, SIZE - t, linkW / 2, linkH / 2, 0, 0, Math.PI * 2); ctx.stroke();
+        // Left edge links
+        ctx.beginPath(); ctx.ellipse(t, pos, linkH / 2, linkW / 2, 0, 0, Math.PI * 2); ctx.stroke();
+        // Right edge links
+        ctx.beginPath(); ctx.ellipse(SIZE - t, pos, linkH / 2, linkW / 2, 0, 0, Math.PI * 2); ctx.stroke();
     }
-    ctx.closePath(); ctx.stroke();
-    // Inner hex accent
-    const r2 = r - t * 1.5;
-    ctx.strokeStyle = accent; ctx.lineWidth = t * 0.3;
-    ctx.beginPath();
-    for (let i = 0; i < 6; i++) {
-        const angle = (Math.PI / 3) * i - Math.PI / 2;
-        const x = cx + r2 * Math.cos(angle);
-        const y = cy + r2 * Math.sin(angle);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.closePath(); ctx.stroke();
 }
 
 function drawCrossStitch(t, fill, accent) {
@@ -797,26 +792,28 @@ function drawCrossStitch(t, fill, accent) {
     }
 }
 
-function drawTribal(t, fill, accent) {
-    // Outer thick frame
+function drawArrow(t, fill, accent) {
+    // Outer border
     ctx.strokeStyle = fill; ctx.lineWidth = t;
     ctx.strokeRect(t / 2, t / 2, SIZE - t, SIZE - t);
-    // Diagonal corner lines
-    const d = t * 4;
-    ctx.strokeStyle = accent; ctx.lineWidth = t * 0.5;
-    [[0, 0, d, d], [SIZE, 0, SIZE - d, d], [SIZE, SIZE, SIZE - d, SIZE - d], [0, SIZE, d, SIZE - d]]
-        .forEach(([x1, y1, x2, y2]) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); });
-    // Inner diamond
-    const inset = t * 2.5;
-    ctx.strokeStyle = fill; ctx.lineWidth = t * 0.4;
-    ctx.beginPath();
-    ctx.moveTo(SIZE / 2, inset); ctx.lineTo(SIZE - inset, SIZE / 2);
-    ctx.lineTo(SIZE / 2, SIZE - inset); ctx.lineTo(inset, SIZE / 2);
-    ctx.closePath(); ctx.stroke();
-    // Center horizontal & vertical accent lines
-    ctx.strokeStyle = accent; ctx.lineWidth = t * 0.3;
-    ctx.beginPath(); ctx.moveTo(d, SIZE / 2); ctx.lineTo(SIZE - d, SIZE / 2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(SIZE / 2, d); ctx.lineTo(SIZE / 2, SIZE - d); ctx.stroke();
+    // Arrow chevrons along edges
+    const arrowSize = t * 1.5;
+    const spacing = arrowSize * 2.5;
+    ctx.strokeStyle = accent; ctx.lineWidth = t * 0.4; ctx.lineCap = 'round';
+    for (let pos = spacing; pos < SIZE - spacing; pos += spacing) {
+        // Top edge arrows (pointing right)
+        ctx.beginPath(); ctx.moveTo(pos - arrowSize / 2, t * 0.2); ctx.lineTo(pos + arrowSize / 2, t);
+        ctx.lineTo(pos - arrowSize / 2, t * 1.8); ctx.stroke();
+        // Bottom edge arrows (pointing left)
+        ctx.beginPath(); ctx.moveTo(pos + arrowSize / 2, SIZE - t * 0.2); ctx.lineTo(pos - arrowSize / 2, SIZE - t);
+        ctx.lineTo(pos + arrowSize / 2, SIZE - t * 1.8); ctx.stroke();
+        // Left edge arrows (pointing down)
+        ctx.beginPath(); ctx.moveTo(t * 0.2, pos - arrowSize / 2); ctx.lineTo(t, pos + arrowSize / 2);
+        ctx.lineTo(t * 1.8, pos - arrowSize / 2); ctx.stroke();
+        // Right edge arrows (pointing up)
+        ctx.beginPath(); ctx.moveTo(SIZE - t * 0.2, pos + arrowSize / 2); ctx.lineTo(SIZE - t, pos - arrowSize / 2);
+        ctx.lineTo(SIZE - t * 1.8, pos + arrowSize / 2); ctx.stroke();
+    }
 }
 
 function drawRope(t, fill, accent) {
@@ -838,32 +835,35 @@ function drawRope(t, fill, accent) {
         });
 }
 
-function drawDiamondGrid(t, fill, accent) {
-    // Outer frame
-    ctx.strokeStyle = fill; ctx.lineWidth = t;
-    ctx.strokeRect(t / 2, t / 2, SIZE - t, SIZE - t);
-    // Diamond pattern along border
-    const diamondSize = t * 2;
-    const spacing = diamondSize * 2;
-    ctx.strokeStyle = accent; ctx.lineWidth = t * 0.3;
-    for (let i = diamondSize; i < SIZE - diamondSize; i += spacing) {
-        // Top edge diamonds
-        ctx.beginPath();
-        ctx.moveTo(i, t * 0.2); ctx.lineTo(i + diamondSize / 2, t); ctx.lineTo(i, t * 1.8);
-        ctx.lineTo(i - diamondSize / 2, t); ctx.closePath(); ctx.stroke();
-        // Bottom edge diamonds
-        ctx.beginPath();
-        ctx.moveTo(i, SIZE - t * 0.2); ctx.lineTo(i + diamondSize / 2, SIZE - t); ctx.lineTo(i, SIZE - t * 1.8);
-        ctx.lineTo(i - diamondSize / 2, SIZE - t); ctx.closePath(); ctx.stroke();
-        // Left edge diamonds
-        ctx.beginPath();
-        ctx.moveTo(t * 0.2, i); ctx.lineTo(t, i + diamondSize / 2); ctx.lineTo(t * 1.8, i);
-        ctx.lineTo(t, i - diamondSize / 2); ctx.closePath(); ctx.stroke();
-        // Right edge diamonds
-        ctx.beginPath();
-        ctx.moveTo(SIZE - t * 0.2, i); ctx.lineTo(SIZE - t, i + diamondSize / 2); ctx.lineTo(SIZE - t * 1.8, i);
-        ctx.lineTo(SIZE - t, i - diamondSize / 2); ctx.closePath(); ctx.stroke();
+function drawNetwork(t, fill, accent) {
+    // Outer border
+    ctx.strokeStyle = fill; ctx.lineWidth = t * 0.5;
+    ctx.strokeRect(t, t, SIZE - t * 2, SIZE - t * 2);
+    // Nodes along edges
+    const spacing = t * 3.5;
+    const nodeR = t * 0.45;
+    const nodes = [];
+    for (let pos = spacing; pos < SIZE - spacing / 2; pos += spacing) {
+        nodes.push([pos, t], [pos, SIZE - t], [t, pos], [SIZE - t, pos]);
     }
+    // Connecting lines between adjacent nodes
+    ctx.strokeStyle = accent; ctx.lineWidth = t * 0.15;
+    ctx.setLineDash([t * 0.3, t * 0.3]);
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            const [x1, y1] = nodes[i]; const [x2, y2] = nodes[j];
+            const dist = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            if (dist < spacing * 1.5) {
+                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+            }
+        }
+    }
+    ctx.setLineDash([]);
+    // Draw nodes
+    ctx.fillStyle = fill;
+    nodes.forEach(([x, y]) => {
+        ctx.beginPath(); ctx.arc(x, y, nodeR, 0, Math.PI * 2); ctx.fill();
+    });
 }
 
 // ===== Styled Badges =====
