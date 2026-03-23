@@ -480,6 +480,9 @@ function render() {
         dotted: drawDotted, filmstrip: drawFilmstrip, ticket: drawTicket,
         chain: drawChain, crossStitch: drawCrossStitch,
         arrow: drawArrow, rope: drawRope, network: drawNetwork,
+        geoBlocks: drawGeoBlocks, bubbles: drawBubbles, mosaic: drawMosaic,
+        floral: drawFloral, pixelArt: drawPixelArt, confetti: drawConfetti,
+        woven: drawWoven, circuit: drawCircuit,
     };
 
     applyBorderEffects(borderDrawFns[creator.style] || drawSimple);
@@ -864,6 +867,280 @@ function drawNetwork(t, fill, accent) {
     nodes.forEach(([x, y]) => {
         ctx.beginPath(); ctx.arc(x, y, nodeR, 0, Math.PI * 2); ctx.fill();
     });
+}
+
+// ===== 8 Decorative Border Styles =====
+
+// Seeded pseudo-random for deterministic shapes
+function seededRand(seed) {
+    let s = seed;
+    return () => { s = (s * 16807 + 0) % 2147483647; return s / 2147483647; };
+}
+
+function drawGeoBlocks(t, fill, accent) {
+    const rng = seededRand(42);
+    const blockCount = 8;
+    const zone = t * 3;
+    // Draw on each side
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate((Math.PI / 2) * side);
+        ctx.translate(-SIZE / 2, -SIZE / 2);
+        // Connecting line along edge
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.3;
+        ctx.beginPath(); ctx.moveTo(0, zone * 0.5); ctx.lineTo(SIZE, zone * 0.5); ctx.stroke();
+        for (let i = 0; i < blockCount; i++) {
+            const x = rng() * SIZE * 0.9;
+            const w = t * (1.5 + rng() * 3);
+            const h = t * (1 + rng() * 2.5);
+            const y = rng() * zone * 0.6;
+            const isFill = rng() > 0.4;
+            if (isFill) {
+                ctx.fillStyle = fill; ctx.globalAlpha = 0.3 + rng() * 0.5;
+                ctx.fillRect(x, y, w, h);
+                ctx.globalAlpha = 1;
+            } else {
+                ctx.strokeStyle = fill; ctx.lineWidth = t * 0.3;
+                ctx.strokeRect(x, y, w, h);
+            }
+            // Connecting line to spine
+            if (rng() > 0.5) {
+                ctx.strokeStyle = accent; ctx.lineWidth = t * 0.2;
+                ctx.beginPath(); ctx.moveTo(x + w / 2, y + h); ctx.lineTo(x + w / 2, zone * 0.5); ctx.stroke();
+            }
+        }
+        ctx.restore();
+    }
+}
+
+function drawBubbles(t, fill, accent) {
+    const rng = seededRand(77);
+    const zone = t * 3.5;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate((Math.PI / 2) * side);
+        ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < 12; i++) {
+            const x = rng() * SIZE;
+            const y = rng() * zone;
+            const r = t * (0.4 + rng() * 1.5);
+            const isFill = rng() > 0.5;
+            if (isFill) {
+                ctx.fillStyle = fill; ctx.globalAlpha = 0.15 + rng() * 0.4;
+                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1;
+            } else {
+                ctx.strokeStyle = fill; ctx.lineWidth = t * 0.25;
+                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+            }
+        }
+        // A few accent bubbles
+        for (let i = 0; i < 3; i++) {
+            ctx.fillStyle = accent; ctx.globalAlpha = 0.4;
+            ctx.beginPath(); ctx.arc(rng() * SIZE, rng() * zone * 0.5, t * (0.3 + rng() * 0.6), 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawMosaic(t, fill, accent) {
+    const zone = t * 2.5;
+    const tileSize = t * 1.2;
+    const cols = Math.ceil(SIZE / tileSize);
+    const rng = seededRand(123);
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate((Math.PI / 2) * side);
+        ctx.translate(-SIZE / 2, -SIZE / 2);
+        const rows = Math.ceil(zone / tileSize);
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const alpha = (1 - row / rows) * (0.3 + rng() * 0.5);
+                if (rng() > 0.3) {
+                    ctx.fillStyle = rng() > 0.7 ? accent : fill;
+                    ctx.globalAlpha = alpha;
+                    ctx.fillRect(col * tileSize + 0.5, row * tileSize + 0.5, tileSize - 1, tileSize - 1);
+                }
+            }
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawFloral(t, fill, accent) {
+    const zone = t * 3;
+    const rng = seededRand(55);
+    function drawPetal(cx, cy, petalR, petals) {
+        for (let p = 0; p < petals; p++) {
+            const angle = (Math.PI * 2 / petals) * p;
+            const px = cx + Math.cos(angle) * petalR;
+            const py = cy + Math.sin(angle) * petalR;
+            ctx.beginPath(); ctx.arc(px, py, petalR * 0.6, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.beginPath(); ctx.arc(cx, cy, petalR * 0.3, 0, Math.PI * 2); ctx.fill();
+    }
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate((Math.PI / 2) * side);
+        ctx.translate(-SIZE / 2, -SIZE / 2);
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.2; ctx.fillStyle = accent;
+        // Vine line
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.15;
+        ctx.beginPath();
+        ctx.moveTo(0, zone * 0.5);
+        for (let x = 0; x < SIZE; x += 20) { ctx.lineTo(x, zone * 0.5 + Math.sin(x * 0.05) * t); }
+        ctx.stroke();
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.2;
+        for (let i = 0; i < 6; i++) {
+            const x = (i + 0.5) * (SIZE / 6) + (rng() - 0.5) * t * 2;
+            const y = zone * 0.4 * rng();
+            const pr = t * (0.5 + rng() * 0.8);
+            const petals = 4 + Math.floor(rng() * 3);
+            drawPetal(x, y, pr, petals);
+        }
+        ctx.restore();
+    }
+}
+
+function drawPixelArt(t, fill, accent) {
+    const pxSize = t * 1;
+    const zone = Math.ceil(t * 2.5 / pxSize) * pxSize;
+    const cols = Math.ceil(SIZE / pxSize);
+    const rows = Math.ceil(zone / pxSize);
+    const rng = seededRand(99);
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate((Math.PI / 2) * side);
+        ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const prob = 1 - (row / rows);
+                if (rng() < prob * 0.7) {
+                    ctx.fillStyle = rng() > 0.8 ? accent : fill;
+                    ctx.globalAlpha = 0.4 + prob * 0.5;
+                    ctx.fillRect(col * pxSize, row * pxSize, pxSize, pxSize);
+                }
+            }
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawConfetti(t, fill, accent) {
+    const zone = t * 3;
+    const rng = seededRand(31);
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate((Math.PI / 2) * side);
+        ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < 18; i++) {
+            const x = rng() * SIZE;
+            const y = rng() * zone;
+            const w = t * (0.4 + rng() * 1.2);
+            const h = t * (0.3 + rng() * 0.8);
+            const angle = rng() * Math.PI;
+            const isCircle = rng() > 0.6;
+            ctx.save();
+            ctx.translate(x, y); ctx.rotate(angle);
+            ctx.fillStyle = rng() > 0.6 ? accent : fill;
+            ctx.globalAlpha = 0.3 + rng() * 0.5;
+            if (isCircle) {
+                ctx.beginPath(); ctx.arc(0, 0, w * 0.5, 0, Math.PI * 2); ctx.fill();
+            } else {
+                ctx.fillRect(-w / 2, -h / 2, w, h);
+            }
+            ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawWoven(t, fill, accent) {
+    const zone = t * 2.5;
+    const strandW = t * 1.5;
+    const gap = t * 0.8;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate((Math.PI / 2) * side);
+        ctx.translate(-SIZE / 2, -SIZE / 2);
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.4;
+        // Horizontal weave strands
+        for (let y = 0; y < zone; y += strandW + gap) {
+            ctx.beginPath();
+            for (let x = 0; x < SIZE; x += strandW * 2) {
+                ctx.moveTo(x, y); ctx.quadraticCurveTo(x + strandW, y + strandW * 0.3, x + strandW * 2, y);
+            }
+            ctx.stroke();
+        }
+        // Vertical cross strands
+        ctx.strokeStyle = accent; ctx.lineWidth = t * 0.25;
+        for (let x = strandW; x < SIZE; x += strandW * 2 + gap) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0); ctx.lineTo(x, zone);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+}
+
+function drawCircuit(t, fill, accent) {
+    const zone = t * 3;
+    const rng = seededRand(88);
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate((Math.PI / 2) * side);
+        ctx.translate(-SIZE / 2, -SIZE / 2);
+        // Traces
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.2;
+        const traceCount = 10;
+        for (let i = 0; i < traceCount; i++) {
+            const x1 = rng() * SIZE;
+            const y1 = rng() * zone * 0.3;
+            const len = t * (2 + rng() * 5);
+            const goDown = rng() > 0.5;
+            ctx.beginPath();
+            ctx.moveTo(x1, 0);
+            ctx.lineTo(x1, y1);
+            if (goDown) {
+                ctx.lineTo(x1 + len, y1);
+                ctx.lineTo(x1 + len, y1 + t * (0.5 + rng()));
+            } else {
+                ctx.lineTo(x1 - len * 0.5, y1);
+            }
+            ctx.stroke();
+            // Solder dot at end
+            ctx.fillStyle = accent;
+            ctx.beginPath(); ctx.arc(x1, y1, t * 0.25, 0, Math.PI * 2); ctx.fill();
+        }
+        // IC chip shapes
+        for (let i = 0; i < 2; i++) {
+            const cx = SIZE * 0.2 + rng() * SIZE * 0.6;
+            const chipW = t * (1.5 + rng());
+            const chipH = t * (0.8 + rng() * 0.5);
+            ctx.fillStyle = fill; ctx.globalAlpha = 0.4;
+            ctx.fillRect(cx, t * 0.2, chipW, chipH);
+            ctx.globalAlpha = 1;
+            // Legs
+            ctx.strokeStyle = fill; ctx.lineWidth = t * 0.1;
+            for (let l = 0; l < 3; l++) {
+                const lx = cx + (l + 0.5) * (chipW / 3);
+                ctx.beginPath(); ctx.moveTo(lx, t * 0.2 + chipH); ctx.lineTo(lx, t * 0.2 + chipH + t * 0.5); ctx.stroke();
+            }
+        }
+        ctx.restore();
+    }
 }
 
 // ===== Styled Badges =====
