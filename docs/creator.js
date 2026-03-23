@@ -483,6 +483,11 @@ function render() {
         geoBlocks: drawGeoBlocks, bubbles: drawBubbles, mosaic: drawMosaic,
         floral: drawFloral, pixelArt: drawPixelArt, confetti: drawConfetti,
         woven: drawWoven, circuit: drawCircuit,
+        starBurst: drawStarBurst, hearts: drawHearts, leaves: drawLeaves,
+        lightning: drawLightning, waves3D: drawWaves3D, triangles: drawTriangles,
+        spiral: drawSpiral, dna: drawDna, barcode: drawBarcode,
+        gradientFade: drawGradientFade, honeycomb: drawHoneycomb,
+        splatter: drawSplatter, ribbon: drawRibbon,
     };
 
     applyBorderEffects(borderDrawFns[creator.style] || drawSimple);
@@ -1139,6 +1144,386 @@ function drawCircuit(t, fill, accent) {
                 ctx.beginPath(); ctx.moveTo(lx, t * 0.2 + chipH); ctx.lineTo(lx, t * 0.2 + chipH + t * 0.5); ctx.stroke();
             }
         }
+        ctx.restore();
+    }
+}
+
+// ===== 13 More Decorative Border Styles =====
+
+function drawStarBurst(t, fill, accent) {
+    const rng = seededRand(200);
+    const zone = t * 3;
+    function star(cx, cy, r, spikes) {
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+            const angle = (i * Math.PI) / spikes - Math.PI / 2;
+            const rad = i % 2 === 0 ? r : r * 0.4;
+            const x = cx + Math.cos(angle) * rad;
+            const y = cy + Math.sin(angle) * rad;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+    }
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < 10; i++) {
+            const x = rng() * SIZE;
+            const y = rng() * zone;
+            const r = t * (0.4 + rng() * 1);
+            const spikes = 4 + Math.floor(rng() * 4);
+            if (rng() > 0.5) {
+                ctx.fillStyle = rng() > 0.6 ? accent : fill;
+                ctx.globalAlpha = 0.3 + rng() * 0.5;
+                star(x, y, r, spikes); ctx.fill();
+            } else {
+                ctx.strokeStyle = fill; ctx.lineWidth = t * 0.2;
+                star(x, y, r, spikes); ctx.stroke();
+            }
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawHearts(t, fill, accent) {
+    const rng = seededRand(143);
+    const zone = t * 3;
+    function heart(cx, cy, size) {
+        const s = size;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + s * 0.4);
+        ctx.bezierCurveTo(cx - s * 0.5, cy - s * 0.2, cx - s, cy + s * 0.1, cx, cy + s);
+        ctx.bezierCurveTo(cx + s, cy + s * 0.1, cx + s * 0.5, cy - s * 0.2, cx, cy + s * 0.4);
+        ctx.closePath();
+    }
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < 8; i++) {
+            const x = rng() * SIZE;
+            const y = rng() * zone * 0.7;
+            const s = t * (0.5 + rng() * 1);
+            ctx.fillStyle = rng() > 0.5 ? accent : fill;
+            ctx.globalAlpha = 0.25 + rng() * 0.45;
+            heart(x, y, s); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawLeaves(t, fill, accent) {
+    const rng = seededRand(67);
+    const zone = t * 3;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        // Vine
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.15;
+        ctx.beginPath(); ctx.moveTo(0, zone * 0.5);
+        for (let x = 0; x < SIZE; x += 10) { ctx.lineTo(x, zone * 0.5 + Math.sin(x * 0.04) * t * 0.5); }
+        ctx.stroke();
+        // Leaves
+        for (let i = 0; i < 10; i++) {
+            const x = rng() * SIZE;
+            const y = rng() * zone * 0.6;
+            const leafW = t * (0.5 + rng() * 0.8);
+            const leafH = t * (1 + rng() * 1.5);
+            const angle = (rng() - 0.5) * 1.5;
+            ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+            ctx.fillStyle = rng() > 0.6 ? accent : fill;
+            ctx.globalAlpha = 0.25 + rng() * 0.4;
+            ctx.beginPath();
+            ctx.moveTo(0, 0); ctx.quadraticCurveTo(leafW, -leafH * 0.5, 0, -leafH);
+            ctx.quadraticCurveTo(-leafW, -leafH * 0.5, 0, 0); ctx.fill();
+            ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawLightning(t, fill, accent) {
+    const rng = seededRand(111);
+    const zone = t * 3;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < 6; i++) {
+            let x = rng() * SIZE;
+            let y = 0;
+            ctx.strokeStyle = rng() > 0.5 ? accent : fill;
+            ctx.lineWidth = t * (0.15 + rng() * 0.25);
+            ctx.globalAlpha = 0.4 + rng() * 0.5;
+            ctx.beginPath(); ctx.moveTo(x, y);
+            const segs = 3 + Math.floor(rng() * 3);
+            for (let s = 0; s < segs; s++) {
+                x += (rng() - 0.5) * t * 2;
+                y += zone / segs * (0.5 + rng() * 0.5);
+                ctx.lineTo(x, Math.min(y, zone));
+            }
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawWaves3D(t, fill, accent) {
+    const layers = 4;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let l = 0; l < layers; l++) {
+            const y = l * t * 0.8;
+            const amp = t * (0.8 - l * 0.15);
+            const freq = 0.03 + l * 0.005;
+            ctx.strokeStyle = l % 2 === 0 ? fill : accent;
+            ctx.lineWidth = t * (0.4 - l * 0.08);
+            ctx.globalAlpha = 1 - l * 0.2;
+            ctx.beginPath();
+            for (let x = 0; x <= SIZE; x += 4) {
+                const yy = y + Math.sin(x * freq + l * 0.8) * amp;
+                x === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
+            }
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawTriangles(t, fill, accent) {
+    const rng = seededRand(155);
+    const zone = t * 3;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < 12; i++) {
+            const x = rng() * SIZE;
+            const y = rng() * zone;
+            const s = t * (0.6 + rng() * 1.2);
+            const flip = rng() > 0.5 ? 1 : -1;
+            ctx.globalAlpha = 0.25 + rng() * 0.45;
+            if (rng() > 0.4) {
+                ctx.fillStyle = rng() > 0.6 ? accent : fill;
+                ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + s, y + s * flip); ctx.lineTo(x - s, y + s * flip); ctx.closePath(); ctx.fill();
+            } else {
+                ctx.strokeStyle = fill; ctx.lineWidth = t * 0.2;
+                ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + s, y + s * flip); ctx.lineTo(x - s, y + s * flip); ctx.closePath(); ctx.stroke();
+            }
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawSpiral(t, fill, accent) {
+    const rng = seededRand(222);
+    const zone = t * 3;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < 6; i++) {
+            const cx = rng() * SIZE;
+            const cy = rng() * zone * 0.8;
+            const maxR = t * (0.8 + rng() * 1.2);
+            const turns = 2 + rng() * 2;
+            ctx.strokeStyle = rng() > 0.5 ? accent : fill;
+            ctx.lineWidth = t * 0.15;
+            ctx.globalAlpha = 0.4 + rng() * 0.4;
+            ctx.beginPath();
+            for (let a = 0; a < turns * Math.PI * 2; a += 0.2) {
+                const r = (a / (turns * Math.PI * 2)) * maxR;
+                const x = cx + Math.cos(a) * r;
+                const y = cy + Math.sin(a) * r;
+                a === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawDna(t, fill, accent) {
+    const zone = t * 2.5;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        const strand1Y = zone * 0.3;
+        const strand2Y = zone * 0.7;
+        const amp = zone * 0.25;
+        const freq = 0.04;
+        // Two helical strands
+        ctx.lineWidth = t * 0.3;
+        for (let s = 0; s < 2; s++) {
+            ctx.strokeStyle = s === 0 ? fill : accent;
+            ctx.beginPath();
+            for (let x = 0; x <= SIZE; x += 3) {
+                const baseY = s === 0 ? strand1Y : strand2Y;
+                const yy = baseY + Math.sin(x * freq + s * Math.PI) * amp;
+                x === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
+            }
+            ctx.stroke();
+        }
+        // Cross rungs
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.1; ctx.globalAlpha = 0.5;
+        for (let x = 0; x < SIZE; x += t * 2) {
+            const y1 = strand1Y + Math.sin(x * freq) * amp;
+            const y2 = strand2Y + Math.sin(x * freq + Math.PI) * amp;
+            ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawBarcode(t, fill, accent) {
+    const rng = seededRand(333);
+    const zone = t * 2.5;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        let x = 0;
+        while (x < SIZE) {
+            const barW = t * (0.1 + rng() * 0.4);
+            const barH = zone * (0.4 + rng() * 0.6);
+            const gap = t * (0.1 + rng() * 0.3);
+            ctx.fillStyle = rng() > 0.8 ? accent : fill;
+            ctx.globalAlpha = 0.4 + rng() * 0.5;
+            ctx.fillRect(x, 0, barW, barH);
+            x += barW + gap;
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawGradientFade(t, fill, accent) {
+    const zone = t * 3;
+    const steps = 8;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < steps; i++) {
+            const y = (i / steps) * zone;
+            const h = zone / steps;
+            ctx.fillStyle = i % 2 === 0 ? fill : accent;
+            ctx.globalAlpha = (1 - i / steps) * 0.6;
+            ctx.fillRect(0, y, SIZE, h);
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawHoneycomb(t, fill, accent) {
+    const hexR = t * 1;
+    const zone = t * 3;
+    const hexH = hexR * Math.sqrt(3);
+    const rng = seededRand(444);
+    function drawHex(cx, cy) {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const a = (Math.PI / 3) * i - Math.PI / 6;
+            const x = cx + hexR * Math.cos(a);
+            const y = cy + hexR * Math.sin(a);
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+    }
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        let row = 0;
+        for (let y = hexR; y < zone + hexR; y += hexH * 0.75) {
+            const offset = row % 2 === 0 ? 0 : hexR * 1.5;
+            for (let x = offset; x < SIZE + hexR; x += hexR * 3) {
+                const alpha = (1 - (y / zone)) * 0.5;
+                if (rng() > 0.3) {
+                    ctx.strokeStyle = rng() > 0.7 ? accent : fill;
+                    ctx.lineWidth = t * 0.15;
+                    ctx.globalAlpha = alpha + 0.1;
+                    drawHex(x, y); ctx.stroke();
+                }
+                if (rng() > 0.7) {
+                    ctx.fillStyle = accent;
+                    ctx.globalAlpha = alpha * 0.5;
+                    drawHex(x, y); ctx.fill();
+                }
+            }
+            row++;
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawSplatter(t, fill, accent) {
+    const rng = seededRand(555);
+    const zone = t * 3.5;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        for (let i = 0; i < 8; i++) {
+            const cx = rng() * SIZE;
+            const cy = rng() * zone * 0.7;
+            const mainR = t * (0.5 + rng() * 1.5);
+            ctx.fillStyle = rng() > 0.5 ? accent : fill;
+            ctx.globalAlpha = 0.2 + rng() * 0.4;
+            // Main blob
+            ctx.beginPath(); ctx.arc(cx, cy, mainR, 0, Math.PI * 2); ctx.fill();
+            // Droplets
+            const dropCount = 2 + Math.floor(rng() * 4);
+            for (let d = 0; d < dropCount; d++) {
+                const angle = rng() * Math.PI * 2;
+                const dist = mainR + rng() * t * 1.5;
+                const dr = t * (0.1 + rng() * 0.3);
+                ctx.beginPath();
+                ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, dr, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
+function drawRibbon(t, fill, accent) {
+    const zone = t * 2.5;
+    for (let side = 0; side < 4; side++) {
+        ctx.save();
+        ctx.translate(SIZE / 2, SIZE / 2); ctx.rotate((Math.PI / 2) * side); ctx.translate(-SIZE / 2, -SIZE / 2);
+        // Filled ribbon band
+        ctx.fillStyle = fill; ctx.globalAlpha = 0.25;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        for (let x = 0; x <= SIZE; x += 4) {
+            ctx.lineTo(x, Math.sin(x * 0.03) * t * 0.5 + t * 0.3);
+        }
+        for (let x = SIZE; x >= 0; x -= 4) {
+            ctx.lineTo(x, Math.sin(x * 0.03) * t * 0.5 + zone * 0.6);
+        }
+        ctx.closePath(); ctx.fill();
+        // Top edge
+        ctx.strokeStyle = fill; ctx.lineWidth = t * 0.3; ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        for (let x = 0; x <= SIZE; x += 4) {
+            const y = Math.sin(x * 0.03) * t * 0.5 + t * 0.3;
+            x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        // Bottom edge
+        ctx.strokeStyle = accent; ctx.lineWidth = t * 0.2;
+        ctx.beginPath();
+        for (let x = 0; x <= SIZE; x += 4) {
+            const y = Math.sin(x * 0.03) * t * 0.5 + zone * 0.6;
+            x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
         ctx.restore();
     }
 }
