@@ -1903,7 +1903,7 @@ imageUploadInput.addEventListener('change', e => {
                 let w = img.width, h = img.height;
                 if (w > h) { h = (h / w) * maxDim; w = maxDim; }
                 else { w = (w / h) * maxDim; h = maxDim; }
-                creator.images.push({ el: img, x: SIZE / 2 - w / 2, y: SIZE / 2 - h / 2, w, h, name: file.name });
+                creator.images.push({ el: img, x: SIZE / 2 - w / 2, y: SIZE / 2 - h / 2, w, h, baseW: w, baseH: h, scale: 100, name: file.name });
                 renderImageList();
                 render();
             };
@@ -1918,17 +1918,23 @@ function renderImageList() {
     imageListEl.innerHTML = '';
     creator.images.forEach((img, i) => {
         const row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)';
+        row.style.cssText = 'display:flex;flex-direction:column;gap:4px;padding:6px 0;border-bottom:1px solid var(--border)';
         row.innerHTML = `
-            <span style="flex:1;font-size:11px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.name || 'Image ' + (i + 1)}</span>
-            <label style="font-size:10px;color:var(--text-muted)">W</label>
-            <input type="number" class="img-w" value="${Math.round(img.w)}" style="width:45px;padding:2px 4px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:11px">
-            <label style="font-size:10px;color:var(--text-muted)">H</label>
-            <input type="number" class="img-h" value="${Math.round(img.h)}" style="width:45px;padding:2px 4px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);font-size:11px">
-            <button class="badge-remove img-del" title="Remove">✕</button>
+            <div style="display:flex;align-items:center;gap:6px">
+                <span style="flex:1;font-size:11px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.name || 'Image ' + (i + 1)}</span>
+                <span class="img-scale-val" style="font-size:10px;color:var(--text-muted);min-width:32px;text-align:right">${img.scale}%</span>
+                <button class="badge-remove img-del" title="Remove">✕</button>
+            </div>
+            <input type="range" class="img-scale" min="10" max="500" value="${img.scale}" style="width:100%;accent-color:var(--primary)">
         `;
-        row.querySelector('.img-w').addEventListener('change', e => { creator.images[i].w = parseInt(e.target.value) || 50; render(); });
-        row.querySelector('.img-h').addEventListener('change', e => { creator.images[i].h = parseInt(e.target.value) || 50; render(); });
+        row.querySelector('.img-scale').addEventListener('input', e => {
+            const s = parseInt(e.target.value);
+            creator.images[i].scale = s;
+            creator.images[i].w = creator.images[i].baseW * s / 100;
+            creator.images[i].h = creator.images[i].baseH * s / 100;
+            row.querySelector('.img-scale-val').textContent = s + '%';
+            render();
+        });
         row.querySelector('.img-del').addEventListener('click', () => { creator.images.splice(i, 1); renderImageList(); render(); });
         imageListEl.appendChild(row);
     });
