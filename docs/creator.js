@@ -83,6 +83,10 @@ const creator = {
     storeBold: true,
     storeItalic: false,
     storeSize: 20,
+    // Store name background
+    storeBg: true,
+    storeBgColor: null,
+    storeBgShape: 'rounded',
     // Border transforms
     borderRotate: 0,
     borderFlipH: false,
@@ -106,6 +110,10 @@ const creator = {
     diagSize: 32,
     diagAngle: -45,
     diagColor: '#ffffff',
+    diagFill: true,
+    diagOutline: 0,
+    diagOutlineColor: '#000000',
+    diagOutlineSize: 32,
     // Badge shape
     badgeShape: 'rounded',
 };
@@ -162,6 +170,13 @@ function syncUIFromState() {
     thicknessInput.value = creator.thickness;
     thicknessVal.textContent = creator.thickness;
     storeNameInput.value = creator.storeName;
+    // Store bg
+    const sbgEl = document.getElementById('cr-store-bg');
+    if (sbgEl) sbgEl.checked = creator.storeBg !== false;
+    const sbgcEl = document.getElementById('cr-store-bg-color');
+    if (sbgcEl) sbgcEl.value = creator.storeBgColor || creator.accent;
+    const sbgsEl = document.getElementById('cr-store-bg-shape');
+    if (sbgsEl) sbgsEl.value = creator.storeBgShape || 'rounded';
     // Badge shape
     const shapeEl = document.getElementById('cr-badge-shape');
     if (shapeEl) shapeEl.value = creator.badgeShape || 'rounded';
@@ -185,6 +200,14 @@ function syncUIFromState() {
     if (daEl) daEl.value = creator.diagAngle;
     const dcEl = document.getElementById('cr-diag-color');
     if (dcEl) dcEl.value = creator.diagColor;
+    const dfEl = document.getElementById('cr-diag-fill');
+    if (dfEl) dfEl.checked = creator.diagFill !== false;
+    const dolEl = document.getElementById('cr-diag-outline');
+    if (dolEl) { dolEl.value = creator.diagOutline || 0; const v = document.getElementById('cr-diag-outline-val'); if (v) v.textContent = creator.diagOutline || 0; }
+    const docEl = document.getElementById('cr-diag-outline-color');
+    if (docEl) docEl.value = creator.diagOutlineColor || '#000000';
+    const dosEl = document.getElementById('cr-diag-outline-size');
+    if (dosEl) { dosEl.value = creator.diagOutlineSize || 32; const v = document.getElementById('cr-diag-outline-size-val'); if (v) v.textContent = creator.diagOutlineSize || 32; }
     renderBadgeControls();
     renderImageList();
 }
@@ -258,10 +281,22 @@ populateFontSelects();
 visualStyleSelect.addEventListener('change', e => { creator.visualStyle = e.target.value; render(); });
 
 // Border style
+const noBorderBtn = document.getElementById('btn-no-border');
+noBorderBtn.addEventListener('click', () => {
+    document.querySelectorAll('#border-style-grid .style-card').forEach(b => b.classList.remove('active'));
+    noBorderBtn.style.background = 'var(--accent)';
+    noBorderBtn.style.color = 'white';
+    noBorderBtn.style.borderColor = 'var(--border)';
+    creator.style = 'none';
+    render();
+});
+
 document.querySelectorAll('#border-style-grid .style-card').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('#border-style-grid .style-card').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        noBorderBtn.style.background = 'var(--bg-secondary)';
+        noBorderBtn.style.color = 'var(--text-secondary)';
         creator.style = btn.dataset.style;
         render();
     });
@@ -308,6 +343,14 @@ thicknessInput.addEventListener('input', e => {
 
 // Store name
 storeNameInput.addEventListener('input', e => { creator.storeName = e.target.value; render(); });
+
+// Store name background
+const storeBgCheck = document.getElementById('cr-store-bg');
+const storeBgColorInput = document.getElementById('cr-store-bg-color');
+const storeBgShapeSelect = document.getElementById('cr-store-bg-shape');
+if (storeBgCheck) storeBgCheck.addEventListener('change', () => { creator.storeBg = storeBgCheck.checked; render(); });
+if (storeBgColorInput) storeBgColorInput.addEventListener('input', e => { creator.storeBgColor = e.target.value; render(); });
+if (storeBgShapeSelect) storeBgShapeSelect.addEventListener('change', e => { creator.storeBgShape = e.target.value; render(); });
 
 // Badge typography
 badgeFontSelect.addEventListener('change', e => { creator.badgeFont = e.target.value; render(); });
@@ -713,7 +756,9 @@ function render() {
         splatter: drawSplatter, ribbon: drawRibbon,
     };
 
-    applyBorderEffects(borderDrawFns[creator.style] || drawSimple);
+    if (creator.style !== 'none') {
+        applyBorderEffects(borderDrawFns[creator.style] || drawSimple);
+    }
 
     if (fx.retroOverlay) {
         ctx.save();
@@ -1965,17 +2010,24 @@ function drawStoreName() {
     }
 
     const storeColor = fx.luxuryColors ? '#d4af37' : (fx.pastelSoften ? lightenColor(creator.accent, 0.35) : creator.accent);
-    ctx.fillStyle = storeColor;
-    ctx.globalAlpha = fx.badgeBgAlpha === 0 ? 0 : 0.9;
-    roundRect(ctx, bx, by, w, h, r);
-    ctx.fill();
+    const bgColor = creator.storeBgColor || storeColor;
+    const showBg = creator.storeBg && creator.storeBgShape !== 'none';
+
+    if (showBg) {
+        ctx.fillStyle = bgColor;
+        ctx.globalAlpha = fx.badgeBgAlpha === 0 ? 0 : 0.9;
+        const bgR = creator.storeBgShape === 'pill' ? h / 2 : r;
+        roundRect(ctx, bx, by, w, h, bgR);
+        ctx.fill();
+    }
     ctx.globalAlpha = 1;
     ctx.shadowColor = 'transparent';
 
-    if (fx.badgeOutline) {
+    if (showBg && fx.badgeOutline) {
         ctx.strokeStyle = fx.badgeOutline.color;
         ctx.lineWidth = fx.badgeOutline.width;
-        roundRect(ctx, bx, by, w, h, r);
+        const bgR = creator.storeBgShape === 'pill' ? h / 2 : r;
+        roundRect(ctx, bx, by, w, h, bgR);
         ctx.stroke();
     }
 
@@ -2053,24 +2105,47 @@ function drawQRCode() {
 // ===== Diagonal Text Watermark =====
 function drawDiagonalText() {
     if (!creator.diagText) return;
+    const hasFill = creator.diagFill;
+    const hasOutline = creator.diagOutline > 0;
+    if (!hasFill && !hasOutline) return;
+
     ctx.save();
     ctx.globalAlpha = creator.diagOpacity / 100;
-    ctx.fillStyle = creator.diagColor;
-    ctx.font = `700 ${creator.diagSize}px 'Inter', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
 
     const angle = creator.diagAngle * Math.PI / 180;
     const text = creator.diagText.toUpperCase();
-    const spacing = creator.diagSize * 5;
+    const mainSize = creator.diagSize;
+    const outSize = creator.diagOutlineSize || mainSize;
+    const maxSize = Math.max(mainSize, outSize);
+    const spacing = maxSize * 5;
     const diag = Math.sqrt(SIZE * SIZE * 2) * 1.5;
 
     ctx.translate(SIZE / 2, SIZE / 2);
     ctx.rotate(angle);
 
+    // Use the larger size for text measurement to get consistent spacing
+    ctx.font = `700 ${maxSize}px 'Inter', sans-serif`;
+    const textWidth = ctx.measureText(text).width;
+    const xStep = textWidth + maxSize * 3;
+
     for (let y = -diag / 2; y < diag / 2; y += spacing) {
-        for (let x = -diag / 2; x < diag / 2; x += ctx.measureText(text).width + creator.diagSize * 3) {
-            ctx.fillText(text, x, y);
+        for (let x = -diag / 2; x < diag / 2; x += xStep) {
+            // Draw outline first (behind fill)
+            if (hasOutline) {
+                ctx.font = `700 ${outSize}px 'Inter', sans-serif`;
+                ctx.strokeStyle = creator.diagOutlineColor;
+                ctx.lineWidth = creator.diagOutline;
+                ctx.strokeText(text, x, y);
+            }
+            // Draw fill on top
+            if (hasFill) {
+                ctx.font = `700 ${mainSize}px 'Inter', sans-serif`;
+                ctx.fillStyle = creator.diagColor;
+                ctx.fillText(text, x, y);
+            }
         }
     }
 
@@ -2569,6 +2644,27 @@ diagSizeInput.addEventListener('input', e => {
 });
 diagAngleSelect.addEventListener('change', e => { creator.diagAngle = parseInt(e.target.value); render(); });
 diagColorInput.addEventListener('input', e => { creator.diagColor = e.target.value; render(); });
+
+// Diagonal text fill & outline
+const diagFillCheck = document.getElementById('cr-diag-fill');
+const diagOutlineInput = document.getElementById('cr-diag-outline');
+const diagOutlineVal = document.getElementById('cr-diag-outline-val');
+const diagOutlineColorInput = document.getElementById('cr-diag-outline-color');
+const diagOutlineSizeInput = document.getElementById('cr-diag-outline-size');
+const diagOutlineSizeVal = document.getElementById('cr-diag-outline-size-val');
+
+if (diagFillCheck) diagFillCheck.addEventListener('change', () => { creator.diagFill = diagFillCheck.checked; render(); });
+if (diagOutlineInput) diagOutlineInput.addEventListener('input', e => {
+    creator.diagOutline = parseInt(e.target.value);
+    diagOutlineVal.textContent = creator.diagOutline;
+    render();
+});
+if (diagOutlineColorInput) diagOutlineColorInput.addEventListener('input', e => { creator.diagOutlineColor = e.target.value; render(); });
+if (diagOutlineSizeInput) diagOutlineSizeInput.addEventListener('input', e => {
+    creator.diagOutlineSize = parseInt(e.target.value);
+    diagOutlineSizeVal.textContent = creator.diagOutlineSize;
+    render();
+});
 
 // Badge shape
 document.getElementById('cr-badge-shape').addEventListener('change', e => {

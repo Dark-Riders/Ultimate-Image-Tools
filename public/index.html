@@ -15,6 +15,7 @@
 </head>
 
 <body>
+  <script>if(localStorage.getItem('theme')==='dark')document.documentElement.dataset.theme='dark';</script>
   <div class="app">
     <!-- Header -->
     <header class="header">
@@ -31,7 +32,10 @@
         <button class="tab-btn active" data-tab="applier">Applier</button>
         <button class="tab-btn" data-tab="creator">Creator</button>
       </div>
-      <span class="header-badge">v1.4.0</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="theme-toggle" style="width:36px;height:36px;border:2.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);font-size:18px;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 150ms ease;display:flex;align-items:center;justify-content:center" title="Toggle dark mode">☀️</button>
+        <span class="header-badge">v1.4.0</span>
+      </div>
     </header>
 
     <!-- ==================== APPLIER TAB ==================== -->
@@ -203,6 +207,7 @@
           <div class="section-header">
             <h2>Border Style</h2>
           </div>
+          <button id="btn-no-border" data-style="none" style="width:100%;padding:6px 12px;margin-bottom:8px;border:2.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em;box-shadow:var(--shadow-sm);transition:all 150ms ease">✕ No Border</button>
           <div class="border-style-grid" id="border-style-grid">
             <button class="style-card active" data-style="simple" title="Simple"><svg viewBox="0 0 80 80">
                 <rect x="4" y="4" width="72" height="72" fill="none" stroke="currentColor" stroke-width="3" rx="1" />
@@ -557,6 +562,20 @@
               </div>
             </div>
           </div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer">
+              <input type="checkbox" id="cr-store-bg" checked> Background
+            </label>
+            <label class="color-field" style="margin:0">
+              <span style="font-size:11px">BG</span>
+              <input type="color" id="cr-store-bg-color" value="#f4a261">
+            </label>
+            <select id="cr-store-bg-shape" class="style-select" style="flex:1;min-width:80px;padding:4px 8px;font-size:11px">
+              <option value="rounded">Rounded</option>
+              <option value="pill">Pill</option>
+              <option value="none">No Shape</option>
+            </select>
+          </div>
         </section>
 
         <!-- Custom Images -->
@@ -625,6 +644,20 @@
               <span style="font-size:11px">Color</span>
               <input type="color" id="cr-diag-color" value="#ffffff">
             </label>
+            <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer">
+              <input type="checkbox" id="cr-diag-fill" checked> Fill
+            </label>
+          </div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+              <label style="font-size:11px;color:var(--text-muted);min-width:70px">Outline <span id="cr-diag-outline-val">0</span>px</label>
+              <input type="range" id="cr-diag-outline" min="0" max="10" value="0" style="flex:1;accent-color:var(--primary)">
+              <input type="color" id="cr-diag-outline-color" value="#000000" style="width:24px;height:24px;border:2px solid var(--border);border-radius:4px;padding:0;cursor:pointer">
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label style="font-size:11px;color:var(--text-muted);min-width:70px">Out. Size <span id="cr-diag-outline-size-val">32</span>px</label>
+              <input type="range" id="cr-diag-outline-size" min="1" max="80" value="32" style="flex:1;accent-color:var(--primary)">
+            </div>
           </div>
         </section>
 
@@ -703,6 +736,24 @@
         btn.classList.add('active');
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
       });
+    });
+
+    // Dark mode toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    function updateThemeIcon() {
+      themeBtn.textContent = document.documentElement.dataset.theme === 'dark' ? '🌙' : '☀️';
+    }
+    updateThemeIcon();
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      if (isDark) {
+        delete document.documentElement.dataset.theme;
+        localStorage.removeItem('theme');
+      } else {
+        document.documentElement.dataset.theme = 'dark';
+        localStorage.setItem('theme', 'dark');
+      }
+      updateThemeIcon();
     });
   </script>
 </body>
