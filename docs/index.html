@@ -181,6 +181,27 @@
     <main class="main tab-content" id="tab-creator">
       <!-- Left Panel - Controls -->
       <div class="panel panel-left creator-controls">
+        <!-- Canvas Size -->
+        <section class="section">
+          <div class="section-header">
+            <h2>Canvas Size</h2>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="style-select" id="cr-canvas-preset" style="flex:1">
+              <option value="1:1">1:1 — 1000×1000</option>
+              <option value="3:4">3:4 — 750×1000</option>
+              <option value="4:3">4:3 — 1000×750</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div id="cr-canvas-custom" style="display:none;margin-top:6px;display:none;gap:6px;align-items:center">
+            <input type="number" id="cr-canvas-w" value="1000" min="100" max="4000" style="width:70px;padding:4px 6px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:'Inter',sans-serif;background:var(--bg-tertiary);color:var(--text-primary)"> 
+            <span style="font-size:12px;font-weight:800;color:var(--text-muted)">×</span>
+            <input type="number" id="cr-canvas-h" value="1000" min="100" max="4000" style="width:70px;padding:4px 6px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:'Inter',sans-serif;background:var(--bg-tertiary);color:var(--text-primary)">
+            <span style="font-size:11px;color:var(--text-muted)">px</span>
+          </div>
+        </section>
+
         <!-- Visual Style -->
         <section class="section">
           <div class="section-header">
@@ -638,6 +659,16 @@
               <option value="30">30°</option>
               <option value="45">45° ↘</option>
             </select>
+          </div>
+          <div class="typo-controls" style="margin-bottom:4px">
+            <label class="typo-label" style="font-size:11px">Font</label>
+            <select class="style-select typo-font-select" id="cr-diag-font"></select>
+            <div class="typo-row">
+              <div class="typo-toggles">
+                <button class="typo-toggle active" id="cr-diag-bold" title="Bold"><b>B</b></button>
+                <button class="typo-toggle" id="cr-diag-italic" title="Italic"><i>I</i></button>
+              </div>
+            </div>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
             <label class="color-field" style="margin:0">

@@ -67,6 +67,9 @@ const creator = {
     style: 'simple',
     visualStyle: 'flat',
     fillMode: 'solid',
+    canvasPreset: '1:1',
+    canvasW: 1000,
+    canvasH: 1000,
     color1: '#e63946',
     color2: '#1d3557',
     accent: '#f4a261',
@@ -114,6 +117,9 @@ const creator = {
     diagOutline: 0,
     diagOutlineColor: '#000000',
     diagOutlineSize: 32,
+    diagFont: 'Inter',
+    diagBold: true,
+    diagItalic: false,
     // Badge shape
     badgeShape: 'rounded',
 };
@@ -170,6 +176,15 @@ function syncUIFromState() {
     thicknessInput.value = creator.thickness;
     thicknessVal.textContent = creator.thickness;
     storeNameInput.value = creator.storeName;
+    // Canvas size
+    const cpEl = document.getElementById('cr-canvas-preset');
+    if (cpEl) cpEl.value = creator.canvasPreset || '1:1';
+    const cwEl = document.getElementById('cr-canvas-w');
+    if (cwEl) cwEl.value = creator.canvasW || 1000;
+    const chEl = document.getElementById('cr-canvas-h');
+    if (chEl) chEl.value = creator.canvasH || 1000;
+    const ccWrap = document.getElementById('cr-canvas-custom');
+    if (ccWrap) ccWrap.style.display = (creator.canvasPreset === 'custom') ? 'flex' : 'none';
     // Store bg
     const sbgEl = document.getElementById('cr-store-bg');
     if (sbgEl) sbgEl.checked = creator.storeBg !== false;
@@ -208,6 +223,10 @@ function syncUIFromState() {
     if (docEl) docEl.value = creator.diagOutlineColor || '#000000';
     const dosEl = document.getElementById('cr-diag-outline-size');
     if (dosEl) { dosEl.value = creator.diagOutlineSize || 32; const v = document.getElementById('cr-diag-outline-size-val'); if (v) v.textContent = creator.diagOutlineSize || 32; }
+    // Diag font
+    if (diagFontSelect) diagFontSelect.value = creator.diagFont || 'Inter';
+    if (diagBoldBtn) diagBoldBtn.classList.toggle('active', creator.diagBold !== false);
+    if (diagItalicBtn) diagItalicBtn.classList.toggle('active', !!creator.diagItalic);
     renderBadgeControls();
     renderImageList();
 }
@@ -257,10 +276,13 @@ const storeBoldBtn = document.getElementById('cr-store-bold');
 const storeItalicBtn = document.getElementById('cr-store-italic');
 const storeSizeInput = document.getElementById('cr-store-size');
 const storeSizeVal = document.getElementById('cr-store-size-val');
+const diagFontSelect = document.getElementById('cr-diag-font');
+const diagBoldBtn = document.getElementById('cr-diag-bold');
+const diagItalicBtn = document.getElementById('cr-diag-italic');
 
 // ===== Populate Font Selects =====
 function populateFontSelects() {
-    [badgeFontSelect, storeFontSelect].forEach(sel => {
+    [badgeFontSelect, storeFontSelect, diagFontSelect].forEach(sel => {
         sel.innerHTML = '';
         FONT_LIST.forEach(f => {
             const opt = document.createElement('option');
@@ -272,10 +294,51 @@ function populateFontSelects() {
     });
     badgeFontSelect.value = creator.badgeFont;
     storeFontSelect.value = creator.storeFont;
+    diagFontSelect.value = creator.diagFont || 'Inter';
 }
 populateFontSelects();
 
 // ===== Controls =====
+
+// Canvas size preset
+const canvasPresetSelect = document.getElementById('cr-canvas-preset');
+const canvasCustomWrap = document.getElementById('cr-canvas-custom');
+const canvasWInput = document.getElementById('cr-canvas-w');
+const canvasHInput = document.getElementById('cr-canvas-h');
+
+const CANVAS_PRESETS = {
+    '1:1': [1000, 1000],
+    '3:4': [750, 1000],
+    '4:3': [1000, 750],
+};
+
+canvasPresetSelect.addEventListener('change', () => {
+    const v = canvasPresetSelect.value;
+    if (v === 'custom') {
+        canvasCustomWrap.style.display = 'flex';
+        creator.canvasPreset = 'custom';
+    } else {
+        canvasCustomWrap.style.display = 'none';
+        creator.canvasPreset = v;
+        const [w, h] = CANVAS_PRESETS[v];
+        creator.canvasW = w;
+        creator.canvasH = h;
+        canvasWInput.value = w;
+        canvasHInput.value = h;
+    }
+    render();
+});
+
+canvasWInput.addEventListener('change', () => {
+    creator.canvasW = Math.max(100, Math.min(4000, parseInt(canvasWInput.value) || 1000));
+    canvasWInput.value = creator.canvasW;
+    render();
+});
+canvasHInput.addEventListener('change', () => {
+    creator.canvasH = Math.max(100, Math.min(4000, parseInt(canvasHInput.value) || 1000));
+    canvasHInput.value = creator.canvasH;
+    render();
+});
 
 // Visual style
 visualStyleSelect.addEventListener('change', e => { creator.visualStyle = e.target.value; render(); });
@@ -422,10 +485,34 @@ btnExport.addEventListener('click', () => {
         : 'watermark';
     link.download = baseName + ext;
 
-    if (fmt === 'png') {
-        link.href = canvas.toDataURL(mime);
+    // Export at target dimensions, cropping from center of the square preview
+    const ew = creator.canvasW;
+    const eh = creator.canvasH;
+    const ratio = ew / eh;
+    let srcX, srcY, srcW, srcH;
+    if (ratio >= 1) {
+        // Wider: full width, crop height
+        srcW = SIZE;
+        srcH = SIZE / ratio;
+        srcX = 0;
+        srcY = (SIZE - srcH) / 2;
     } else {
-        link.href = canvas.toDataURL(mime, quality);
+        // Taller: full height, crop width
+        srcH = SIZE;
+        srcW = SIZE * ratio;
+        srcX = (SIZE - srcW) / 2;
+        srcY = 0;
+    }
+    const expCanvas = document.createElement('canvas');
+    expCanvas.width = ew;
+    expCanvas.height = eh;
+    const expCtx = expCanvas.getContext('2d');
+    expCtx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, ew, eh);
+
+    if (fmt === 'png') {
+        link.href = expCanvas.toDataURL(mime);
+    } else {
+        link.href = expCanvas.toDataURL(mime, quality);
     }
     link.click();
 });
@@ -773,6 +860,44 @@ function render() {
     if (creator.storeName) drawStoreName();
     if (creator.qrImage) drawQRCode();
     if (creator.diagText) drawDiagonalText();
+
+    // Draw crop overlay for non-square canvas presets
+    const cRatio = creator.canvasW / creator.canvasH;
+    if (Math.abs(cRatio - 1) > 0.01) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        if (cRatio > 1) {
+            // Wider: crop top and bottom
+            const cropH = SIZE / cRatio;
+            const cropY = (SIZE - cropH) / 2;
+            ctx.fillRect(0, 0, SIZE, cropY);
+            ctx.fillRect(0, cropY + cropH, SIZE, cropY);
+            // Dashed crop lines
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, cropY); ctx.lineTo(SIZE, cropY);
+            ctx.moveTo(0, cropY + cropH); ctx.lineTo(SIZE, cropY + cropH);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        } else {
+            // Taller: crop left and right
+            const cropW = SIZE * cRatio;
+            const cropX = (SIZE - cropW) / 2;
+            ctx.fillRect(0, 0, cropX, SIZE);
+            ctx.fillRect(cropX + cropW, 0, cropX, SIZE);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(cropX, 0); ctx.lineTo(cropX, SIZE);
+            ctx.moveTo(cropX + cropW, 0); ctx.lineTo(cropX + cropW, SIZE);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        ctx.restore();
+    }
 
     // Draw selection highlight
     if (selectedElement) {
@@ -2103,17 +2228,17 @@ function drawQRCode() {
 }
 
 // ===== Diagonal Text Watermark =====
+function getDiagFont(size) {
+    const style = creator.diagItalic ? 'italic ' : '';
+    const weight = creator.diagBold ? '700' : '400';
+    return `${style}${weight} ${size}px '${creator.diagFont || 'Inter'}', sans-serif`;
+}
+
 function drawDiagonalText() {
     if (!creator.diagText) return;
     const hasFill = creator.diagFill;
     const hasOutline = creator.diagOutline > 0;
     if (!hasFill && !hasOutline) return;
-
-    ctx.save();
-    ctx.globalAlpha = creator.diagOpacity / 100;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round';
 
     const angle = creator.diagAngle * Math.PI / 180;
     const text = creator.diagText.toUpperCase();
@@ -2123,33 +2248,74 @@ function drawDiagonalText() {
     const spacing = maxSize * 5;
     const diag = Math.sqrt(SIZE * SIZE * 2) * 1.5;
 
-    ctx.translate(SIZE / 2, SIZE / 2);
-    ctx.rotate(angle);
-
-    // Use the larger size for text measurement to get consistent spacing
-    ctx.font = `700 ${maxSize}px 'Inter', sans-serif`;
+    // Measure text width for spacing
+    ctx.font = getDiagFont(maxSize);
     const textWidth = ctx.measureText(text).width;
     const xStep = textWidth + maxSize * 3;
 
-    for (let y = -diag / 2; y < diag / 2; y += spacing) {
-        for (let x = -diag / 2; x < diag / 2; x += xStep) {
-            // Draw outline first (behind fill)
-            if (hasOutline) {
-                ctx.font = `700 ${outSize}px 'Inter', sans-serif`;
-                ctx.strokeStyle = creator.diagOutlineColor;
-                ctx.lineWidth = creator.diagOutline;
-                ctx.strokeText(text, x, y);
-            }
-            // Draw fill on top
-            if (hasFill) {
-                ctx.font = `700 ${mainSize}px 'Inter', sans-serif`;
-                ctx.fillStyle = creator.diagColor;
-                ctx.fillText(text, x, y);
+    if (hasOutline && !hasFill) {
+        // Outline-only: use offscreen canvas to get clean single-line outline
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = canvas.width;
+        offCanvas.height = canvas.height;
+        const offCtx = offCanvas.getContext('2d');
+        offCtx.textAlign = 'center';
+        offCtx.textBaseline = 'middle';
+        offCtx.lineJoin = 'round';
+        offCtx.translate(SIZE / 2, SIZE / 2);
+        offCtx.rotate(angle);
+
+        // Draw stroke
+        offCtx.font = getDiagFont(outSize);
+        offCtx.strokeStyle = creator.diagOutlineColor;
+        offCtx.lineWidth = creator.diagOutline;
+        for (let y = -diag / 2; y < diag / 2; y += spacing) {
+            for (let x = -diag / 2; x < diag / 2; x += xStep) {
+                offCtx.strokeText(text, x, y);
             }
         }
-    }
 
-    ctx.restore();
+        // Cut out interior to leave only outer outline
+        offCtx.globalCompositeOperation = 'destination-out';
+        offCtx.font = getDiagFont(outSize);
+        for (let y = -diag / 2; y < diag / 2; y += spacing) {
+            for (let x = -diag / 2; x < diag / 2; x += xStep) {
+                offCtx.fillText(text, x, y);
+            }
+        }
+
+        // Composite to main canvas
+        ctx.save();
+        ctx.globalAlpha = creator.diagOpacity / 100;
+        ctx.drawImage(offCanvas, 0, 0);
+        ctx.restore();
+    } else {
+        // Fill + optional outline: draw directly
+        ctx.save();
+        ctx.globalAlpha = creator.diagOpacity / 100;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.lineJoin = 'round';
+        ctx.translate(SIZE / 2, SIZE / 2);
+        ctx.rotate(angle);
+
+        for (let y = -diag / 2; y < diag / 2; y += spacing) {
+            for (let x = -diag / 2; x < diag / 2; x += xStep) {
+                if (hasOutline) {
+                    ctx.font = getDiagFont(outSize);
+                    ctx.strokeStyle = creator.diagOutlineColor;
+                    ctx.lineWidth = creator.diagOutline;
+                    ctx.strokeText(text, x, y);
+                }
+                if (hasFill) {
+                    ctx.font = getDiagFont(mainSize);
+                    ctx.fillStyle = creator.diagColor;
+                    ctx.fillText(text, x, y);
+                }
+            }
+        }
+        ctx.restore();
+    }
 }
 
 // ===== Border Transform Controls =====
@@ -2644,6 +2810,19 @@ diagSizeInput.addEventListener('input', e => {
 });
 diagAngleSelect.addEventListener('change', e => { creator.diagAngle = parseInt(e.target.value); render(); });
 diagColorInput.addEventListener('input', e => { creator.diagColor = e.target.value; render(); });
+
+// Diagonal text font
+diagFontSelect.addEventListener('change', e => { creator.diagFont = e.target.value; render(); });
+diagBoldBtn.addEventListener('click', () => {
+    creator.diagBold = !creator.diagBold;
+    diagBoldBtn.classList.toggle('active', creator.diagBold);
+    render();
+});
+diagItalicBtn.addEventListener('click', () => {
+    creator.diagItalic = !creator.diagItalic;
+    diagItalicBtn.classList.toggle('active', creator.diagItalic);
+    render();
+});
 
 // Diagonal text fill & outline
 const diagFillCheck = document.getElementById('cr-diag-fill');
