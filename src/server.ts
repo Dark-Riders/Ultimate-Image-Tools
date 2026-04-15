@@ -9,7 +9,13 @@ async function serveStatic(path: string): Promise<Response> {
     const filePath = join(import.meta.dir, "..", "public", path === "/" ? "index.html" : path);
     const file = Bun.file(filePath);
     if (await file.exists()) {
-        return new Response(file);
+        return new Response(file, {
+            headers: {
+                // Required for SharedArrayBuffer (ONNX WASM multi-threading in BG Remover)
+                "Cross-Origin-Opener-Policy": "same-origin",
+                "Cross-Origin-Embedder-Policy": "credentialless",
+            },
+        });
     }
     return new Response("Not found", { status: 404 });
 }
@@ -43,7 +49,7 @@ async function handlePreview(req: Request): Promise<Response> {
             const scale = minSize / Math.min(width, height);
             const newW = Math.round(width * scale);
             const newH = Math.round(height * scale);
-            imgBuf = await sharp(imageBuffer).resize(newW, newH, { fit: "fill" }).toBuffer();
+            imgBuf = await sharp(imageBuffer).resize(newW, newH, { fit: "fill" }).toBuffer() as Buffer<ArrayBuffer>;
             width = newW;
             height = newH;
         }

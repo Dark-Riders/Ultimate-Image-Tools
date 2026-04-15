@@ -79,14 +79,19 @@ Opens at **http://localhost:19683** (port = 3⁹).
 
 Create custom watermark templates directly in the browser:
 
-- **8 border styles**: Simple, Double, Angular, Corners, Layered, Bracket, Rounded, Inset
+- **40 border styles**: Simple, Double, Angular, Corners, Layered, Bracket, Rounded, Inset, Wavy, Scalloped, Zigzag, Dotted, Filmstrip, Ticket, Chain, Cross Stitch, Arrow, Rope, Network, Geo Blocks, Bubbles, Mosaic, Floral, Pixel Art, Confetti, Woven, Circuit, Star Burst, Hearts, Leaves, Lightning, Waves 3D, Triangles, Spiral, DNA, Barcode, Gradient Fade, Honeycomb, Splatter, Ribbon
 - **3 fill modes**: Solid color, Gradient (diagonal), Diagonal stripes
-- **3 color controls**: Color 1, Color 2, Accent
+- **3 color controls**: Color 1, Color 2, Accent + 50 color palettes
 - **Adjustable thickness**: 4–50px slider
 - **12 badge presets**: Gratis Ongkir, Bayar Ditempat, Bisa COD, Special Discount, Harga Murah, Best Seller, Premium Quality, Promo, Ready Stock, Original 100%, Bonus Gift, Flash Sale
 - **Custom badges**: Add blank badges with custom emoji, text, color, and position
 - **Store name banner**: Optional branded text on the border
-- **Export as PNG**: Downloads the watermark template ready for use
+- **QR code**: Generate and place QR codes on the watermark
+- **Diagonal text watermark**: Repeating text overlay with opacity, size, angle controls
+- **Canvas presets**: 1:1, 3:4, 4:3, and custom dimensions
+- **Templates**: Save/load/export/import template configurations
+- **Undo/Redo**: Ctrl+Z / Ctrl+Y support
+- **Export**: PNG, JPEG, or WebP with quality control
 
 ## Tech Stack
 
@@ -95,3 +100,4 @@ Create custom watermark templates directly in the browser:
 - **Image Processing**: Sharp (libvips)
 - **ZIP**: JSZip
 - **GUI**: Vanilla HTML/CSS/JS + Bun HTTP server
+- **Creator Architecture**: 10 modular files in `public/creator/` using `window.Creator` namespace

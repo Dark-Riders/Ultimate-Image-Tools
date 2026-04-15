@@ -74,3 +74,12 @@
 
 ## 2026-03-02 15:23
 - Updated all documentation: `progress.log`, `README.md`, `agent-notes.md`, `ideas.md`
+
+## 2026-04-15 16:50
+- Refactored `creator.js` (2871 lines) into 10 modular files in `public/creator/` folder
+- Split by concern: state, data, utils, styles, borders (3 files), render, interaction, controls
+- Uses `window.Creator` global namespace pattern (no bundler needed)
+- Original `creator.js` preserved untouched as backup
+- Verified with automated comparison script: all 78 functions, 48 draw functions, 40 border keys match
+- Browser tested: zero console errors, full feature parity confirmed
+- Files: `creator-state.js`, `creator-data.js`, `creator-utils.js`, `creator-styles.js`, `creator-borders-basic.js`, `creator-borders-decorative.js`, `creator-borders-artistic.js`, `creator-render.js`, `creator-interaction.js`, `creator-controls.js`
