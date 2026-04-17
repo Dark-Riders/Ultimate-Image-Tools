@@ -30,6 +30,16 @@ After completing **every** task (no matter how small), you **MUST** do the follo
 
 No change is too small to log. Even a one-line fix, a renamed variable, or a config tweak must be recorded in `progress.log`.
 
+## JavaScript File Structure Rules
+
+1. **Max ~300 lines per JS file.** Before writing any JS file, verify that the planned content will fit within this limit. If it won't, split it into multiple files upfront — don't create monoliths that need refactoring later.
+2. **Folder-based modules.** When multiple JS files share functions/state (e.g., `creator/`, `remover/`), group them into a dedicated folder. Each file in the folder should have a clear, single responsibility.
+3. **Splitting existing files.** When a file grows beyond ~300 lines and must be split:
+   - Keep the original file intact until the split is verified.
+   - After creating all new split files, **compare** the combined content of the split files against the original to ensure nothing was lost or duplicated.
+   - **Test for bugs** — load the app and verify all functionality works with the new split files.
+   - Only **delete the original file** after confirming the split is correct and bug-free.
+
 ## Workflow
 
 1. Read `README.md`

@@ -28,6 +28,11 @@ Things I'm considering but haven't committed to implementing yet.
 - [—] Progress bar for large batches in GUI — *(skipped — already has a basic progress bar)*
 - [ ] **Preview Grid** — Show 2×2 or 3×3 grid preview of multiple processed images at once in the Applier.
 
+## BG Remover / Pre-Mask Enhancements
+- [ ] **Contiguous Toggle** — Add `☑ Contiguous` checkbox for Wand/Quick Select (default ON). When OFF, select ALL matching pixels globally instead of flood-fill.
+- [ ] **Smooth Edges (Anti-Aliasing)** — Add `☑ Smooth Edges` toggle. Apply 1-2px Gaussian falloff at selection boundaries for natural blending.
+- [ ] **Edge-Aware Quick Select (Sobel)** — Precompute Sobel gradient map. Scale tolerance down near strong edges so Quick Select snaps to object boundaries.
+
 ## General
 - [—] PWA support (offline-capable) — *(skipped — runs locally via bun)*
 - [—] Keyboard shortcuts for common actions — *(skipped — key ones already done: Ctrl+Z/Y, Delete)*
