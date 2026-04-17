@@ -47,7 +47,7 @@ function fitCanvasToContainer() {
 
 function selectImage(index) {
     selectedIndex = index;
-    const img = images[index];
+    const img = removerImages[index];
     if (!img) return;
     editorMode = 'preview';
     emptyState.style.display = 'none';

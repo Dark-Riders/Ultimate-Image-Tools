@@ -1,9 +1,9 @@
 // ===== COMPOSE (shared canvas) =====
-// ═══════════════════════════════════════════
 // Move, resize, and export cutout on background.
+// Event listeners are in remover-download.js.
 
 async function enterCompose() {
-    const img = images[selectedIndex];
+    const img = removerImages[selectedIndex];
     if (!img) return;
     editorMode = 'compose';
     showUI({ canvas: true, composeToolbar: true, cursor: 'grab' });
@@ -35,7 +35,6 @@ function renderCompose() {
     else if (bg === 'color') { editorCtx.fillStyle = composeBgColor.value; editorCtx.fillRect(0, 0, w, h); }
     const sw = composeObj.w * composeObj.scale, sh = composeObj.h * composeObj.scale;
     editorCtx.drawImage(composeObj.img, composeObj.x, composeObj.y, sw, sh);
-    // Selection border
     editorCtx.strokeStyle = 'rgba(108, 92, 231, 0.8)';
     editorCtx.lineWidth = 2; editorCtx.setLineDash([6, 3]);
     editorCtx.strokeRect(composeObj.x, composeObj.y, sw, sh);
@@ -53,7 +52,6 @@ function renderComposeClean() {
     editorCtx.drawImage(composeObj.img, composeObj.x, composeObj.y, sw, sh);
 }
 
-// Compose mouse handlers
 function composeMouseDown(e) {
     if (!composeObj) return;
     const { x, y } = canvasCoords(e);
@@ -83,46 +81,3 @@ function composeTouchMove(e) {
     composeObj.x = x - composeObj.offsetX; composeObj.y = y - composeObj.offsetY;
     renderCompose();
 }
-document.addEventListener('mouseup', () => { if (composeObj) { composeObj.dragging = false; if (editorMode === 'compose') editorCanvas.style.cursor = 'grab'; } });
-
-// Compose toolbar
-composeBgType.addEventListener('change', () => { composeBgColor.hidden = composeBgType.value !== 'color'; renderCompose(); });
-composeBgColor.addEventListener('input', () => renderCompose());
-composeScaleSlider.addEventListener('input', () => {
-    if (!composeObj) return;
-    composeObj.scale = parseInt(composeScaleSlider.value) / 100;
-    composeScaleVal.textContent = composeScaleSlider.value + '%';
-    renderCompose();
-});
-composeBtnReset.addEventListener('click', () => {
-    if (!composeObj) return;
-    composeObj.x = 0; composeObj.y = 0; composeObj.scale = 1;
-    composeScaleSlider.value = 100; composeScaleVal.textContent = '100%';
-    renderCompose();
-});
-composeBtnApply.addEventListener('click', () => {
-    if (!composeObj || selectedIndex < 0) return;
-    renderComposeClean();
-    editorCanvas.toBlob((blob) => {
-        const img = images[selectedIndex];
-        if (img.resultUrl) URL.revokeObjectURL(img.resultUrl);
-        img.resultBlob = blob; img.resultUrl = URL.createObjectURL(blob);
-        renderResults();
-        renderCompose();
-        statusText.textContent = '✅ Composed result applied!';
-        progressWrap.hidden = false;
-        setTimeout(() => { progressWrap.hidden = true; }, 2000);
-    }, 'image/png');
-});
-composeBtnExport.addEventListener('click', () => {
-    if (!composeObj) return;
-    renderComposeClean();
-    editorCanvas.toBlob((blob) => {
-        const link = document.createElement('a');
-        link.download = (images[selectedIndex]?.name.replace(/\.[^.]+$/, '') || 'composed') + '_composed.png';
-        link.href = URL.createObjectURL(blob);
-        link.click(); URL.revokeObjectURL(link.href);
-        renderCompose();
-    }, 'image/png');
-});
-composeBtnClose.addEventListener('click', () => { exitEditor(); if (selectedIndex >= 0) selectImage(selectedIndex); });

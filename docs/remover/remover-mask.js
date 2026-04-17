@@ -4,7 +4,7 @@
 // Post-process mask editing: restore/erase brush on AI results.
 
 async function enterMaskEditor() {
-    const img = images[selectedIndex];
+    const img = removerImages[selectedIndex];
     if (!img) return;
     editorMode = 'mask';
     showUI({ canvas: true, maskToolbar: true, cursor: 'none' });

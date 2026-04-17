@@ -24,11 +24,11 @@ async function ensureModelLoaded() {
 
 // ===== Process =====
 processBtn.addEventListener('click', async () => {
-    if (processing || images.length === 0) return;
+    if (processing || removerImages.length === 0) return;
     processing = true; processBtn.disabled = true;
     progressWrap.hidden = false; downloadSection.hidden = true;
     try { await ensureModelLoaded(); } catch { processing = false; processBtn.disabled = false; return; }
-    const pending = images.filter(img => img.status !== 'done');
+    const pending = removerImages.filter(img => img.status !== 'done');
     const total = pending.length;
     for (let i = 0; i < pending.length; i++) {
         const img = pending[i];
@@ -49,10 +49,10 @@ processBtn.addEventListener('click', async () => {
         renderImageList();
     }
     progressFill.style.width = '100%';
-    const doneCount = images.filter(i => i.status === 'done').length;
+    const doneCount = removerImages.filter(i => i.status === 'done').length;
     statusText.textContent = '✅ Done! ' + doneCount + '/' + total + ' processed';
     processing = false; updateProcessBtn();
     if (doneCount > 0) { downloadSection.hidden = false; renderResults(); }
-    const firstDone = images.findIndex(i => i.status === 'done');
+    const firstDone = removerImages.findIndex(i => i.status === 'done');
     if (firstDone >= 0) selectImage(firstDone);
 });

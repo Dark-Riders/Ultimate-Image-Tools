@@ -4,7 +4,7 @@
 // Paint to select objects, magic wand, quick select.
 
 async function enterPreMask() {
-    const img = images[selectedIndex];
+    const img = removerImages[selectedIndex];
     if (!img) return;
     editorMode = 'premask';
     preMaskMode = 'keep';
@@ -226,7 +226,7 @@ function applyPreMask() {
     rctx.drawImage(preMaskOriginal, 0, 0);
 
     rc.toBlob((blob) => {
-        const img = images[selectedIndex];
+        const img = removerImages[selectedIndex];
         img.resultBlob = blob;
         if (img.resultUrl) URL.revokeObjectURL(img.resultUrl);
         img.resultUrl = URL.createObjectURL(blob);
