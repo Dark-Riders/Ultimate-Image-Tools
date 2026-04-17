@@ -82,15 +82,34 @@ function initRemoverListeners() {
 
     // Mask toolbar
     maskBtnRestore.addEventListener('click', () => {
-        if (editorMode === 'premask') setPreMaskTool('keep');
-        else { maskMode = 'restore'; maskBtnRestore.classList.add('active'); maskBtnErase.classList.remove('active'); }
+        if (editorMode === 'premask') {
+            // If currently in wand/quicksel, just switch action to keep
+            if (preMaskMode === 'wand' || preMaskMode === 'quicksel') {
+                setPreMaskAction('keep');
+            } else {
+                setPreMaskTool('keep');
+            }
+        } else {
+            maskMode = 'restore'; maskBtnRestore.classList.add('active'); maskBtnErase.classList.remove('active');
+        }
     });
     maskBtnErase.addEventListener('click', () => {
-        if (editorMode === 'premask') setPreMaskTool('remove');
-        else { maskMode = 'erase'; maskBtnErase.classList.add('active'); maskBtnRestore.classList.remove('active'); }
+        if (editorMode === 'premask') {
+            if (preMaskMode === 'wand' || preMaskMode === 'quicksel') {
+                setPreMaskAction('remove');
+            } else {
+                setPreMaskTool('remove');
+            }
+        } else {
+            maskMode = 'erase'; maskBtnErase.classList.add('active'); maskBtnRestore.classList.remove('active');
+        }
     });
-    maskBtnWand.addEventListener('click', () => { if (editorMode === 'premask') setPreMaskTool('wand'); });
-    maskBtnQuickSel.addEventListener('click', () => { if (editorMode === 'premask') setPreMaskTool('quicksel'); });
+    maskBtnWand.addEventListener('click', () => {
+        if (editorMode === 'premask') setPreMaskTool(preMaskMode === 'wand' ? 'keep' : 'wand');
+    });
+    maskBtnQuickSel.addEventListener('click', () => {
+        if (editorMode === 'premask') setPreMaskTool(preMaskMode === 'quicksel' ? 'keep' : 'quicksel');
+    });
     toleranceSlider.addEventListener('input', () => { preMaskTolerance = parseInt(toleranceSlider.value); toleranceVal.textContent = preMaskTolerance; });
     maskBrushSlider.addEventListener('input', () => { maskBrushSize = parseInt(maskBrushSlider.value); maskBrushVal.textContent = maskBrushSize; });
     maskBtnUndo.addEventListener('click', () => {
@@ -219,8 +238,9 @@ function initRemoverListeners() {
     // Compose mouse up
     document.addEventListener('mouseup', () => { if (composeObj) { composeObj.dragging = false; if (editorMode === 'compose') editorCanvas.style.cursor = 'grab'; } });
 
-    // Ctrl+Z undo
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
+        // Ctrl+Z undo
         if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
             if (editorMode === 'premask') {
                 e.preventDefault();
@@ -229,6 +249,40 @@ function initRemoverListeners() {
                 e.preventDefault();
                 if (maskHistory.length > 1) { maskHistory.pop(); editorCtx.putImageData(maskHistory[maskHistory.length - 1], 0, 0); }
             }
+            return;
+        }
+        // Only process shortcuts when in mask/premask mode
+        if (editorMode !== 'mask' && editorMode !== 'premask') return;
+
+        // [ ] = brush size (step 5)
+        if (e.key === '[') {
+            e.preventDefault();
+            maskBrushSize = Math.max(5, maskBrushSize - 5);
+            maskBrushSlider.value = maskBrushSize;
+            maskBrushVal.textContent = maskBrushSize;
+            return;
+        }
+        if (e.key === ']') {
+            e.preventDefault();
+            maskBrushSize = Math.min(80, maskBrushSize + 5);
+            maskBrushSlider.value = maskBrushSize;
+            maskBrushVal.textContent = maskBrushSize;
+            return;
+        }
+        // { } (Shift+[ Shift+]) = tolerance (step 5)
+        if (e.key === '{') {
+            e.preventDefault();
+            preMaskTolerance = Math.max(0, preMaskTolerance - 5);
+            toleranceSlider.value = preMaskTolerance;
+            toleranceVal.textContent = preMaskTolerance;
+            return;
+        }
+        if (e.key === '}') {
+            e.preventDefault();
+            preMaskTolerance = Math.min(255, preMaskTolerance + 5);
+            toleranceSlider.value = preMaskTolerance;
+            toleranceVal.textContent = preMaskTolerance;
+            return;
         }
     });
 
