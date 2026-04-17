@@ -238,8 +238,9 @@ function initRemoverListeners() {
     // Compose mouse up
     document.addEventListener('mouseup', () => { if (composeObj) { composeObj.dragging = false; if (editorMode === 'compose') editorCanvas.style.cursor = 'grab'; } });
 
-    // Ctrl+Z undo
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
+        // Ctrl+Z undo
         if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
             if (editorMode === 'premask') {
                 e.preventDefault();
@@ -248,6 +249,40 @@ function initRemoverListeners() {
                 e.preventDefault();
                 if (maskHistory.length > 1) { maskHistory.pop(); editorCtx.putImageData(maskHistory[maskHistory.length - 1], 0, 0); }
             }
+            return;
+        }
+        // Only process shortcuts when in mask/premask mode
+        if (editorMode !== 'mask' && editorMode !== 'premask') return;
+
+        // [ ] = brush size (step 5)
+        if (e.key === '[') {
+            e.preventDefault();
+            maskBrushSize = Math.max(5, maskBrushSize - 5);
+            maskBrushSlider.value = maskBrushSize;
+            maskBrushVal.textContent = maskBrushSize;
+            return;
+        }
+        if (e.key === ']') {
+            e.preventDefault();
+            maskBrushSize = Math.min(80, maskBrushSize + 5);
+            maskBrushSlider.value = maskBrushSize;
+            maskBrushVal.textContent = maskBrushSize;
+            return;
+        }
+        // { } (Shift+[ Shift+]) = tolerance (step 5)
+        if (e.key === '{') {
+            e.preventDefault();
+            preMaskTolerance = Math.max(0, preMaskTolerance - 5);
+            toleranceSlider.value = preMaskTolerance;
+            toleranceVal.textContent = preMaskTolerance;
+            return;
+        }
+        if (e.key === '}') {
+            e.preventDefault();
+            preMaskTolerance = Math.min(255, preMaskTolerance + 5);
+            toleranceSlider.value = preMaskTolerance;
+            toleranceVal.textContent = preMaskTolerance;
+            return;
         }
     });
 

@@ -39,6 +39,9 @@ async function enterPreMask() {
     tmpCtx.drawImage(preMaskOriginal, 0, 0);
     preMaskPixelData = tmpCtx.getImageData(0, 0, w, h);
 
+    // Pre-compute Sobel edge map for edge-aware quick select
+    preMaskEdgeMap = computeEdgeMap(preMaskPixelData);
+
     // Create mask canvas (empty = nothing selected)
     preMaskCanvas = document.createElement('canvas');
     preMaskCanvas.width = w; preMaskCanvas.height = h;
@@ -144,13 +147,43 @@ function magicWandAt(startX, startY) {
     renderPreMask();
 }
 
-// ===== QUICK SELECT (smart brush — region grow from brush center) =====
+// ===== SOBEL EDGE DETECTION =====
+function computeEdgeMap(imageData) {
+    const w = imageData.width, h = imageData.height;
+    const px = imageData.data;
+    const gray = new Float32Array(w * h);
+    // Convert to grayscale
+    for (let i = 0; i < w * h; i++) {
+        const j = i * 4;
+        gray[i] = 0.299 * px[j] + 0.587 * px[j+1] + 0.114 * px[j+2];
+    }
+    // Sobel kernels
+    const edges = new Float32Array(w * h);
+    for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+            const tl = gray[(y-1)*w+(x-1)], tc = gray[(y-1)*w+x], tr = gray[(y-1)*w+(x+1)];
+            const ml = gray[y*w+(x-1)],                          mr = gray[y*w+(x+1)];
+            const bl = gray[(y+1)*w+(x-1)], bc = gray[(y+1)*w+x], br = gray[(y+1)*w+(x+1)];
+            const gx = -tl + tr - 2*ml + 2*mr - bl + br;
+            const gy = -tl - 2*tc - tr + bl + 2*bc + br;
+            edges[y * w + x] = Math.sqrt(gx * gx + gy * gy);
+        }
+    }
+    // Normalize to 0-255
+    let maxE = 0;
+    for (let i = 0; i < edges.length; i++) if (edges[i] > maxE) maxE = edges[i];
+    if (maxE > 0) for (let i = 0; i < edges.length; i++) edges[i] = (edges[i] / maxE) * 255;
+    return edges;
+}
+
+// ===== QUICK SELECT (edge-aware smart brush) =====
 function quickSelectAt(cx, cy) {
-    if (!preMaskPixelData) return;
+    if (!preMaskPixelData || !preMaskEdgeMap) return;
     const w = preMaskPixelData.width, h = preMaskPixelData.height;
     const px = preMaskPixelData.data;
+    const edges = preMaskEdgeMap;
     const brushR = maskBrushSize * (editorCanvas.width / editorCanvas.getBoundingClientRect().width);
-    const growR = brushR * 3; // expansion radius
+    const growR = brushR * 3;
     const scx = Math.round(cx), scy = Math.round(cy);
     if (scx < 0 || scx >= w || scy < 0 || scy >= h) return;
 
@@ -167,9 +200,11 @@ function quickSelectAt(cx, cy) {
     }
     if (cnt === 0) return;
     const ar = sumR / cnt, ag = sumG / cnt, ab = sumB / cnt;
-    const tol = preMaskTolerance; // direct 0-255
+    const tol = preMaskTolerance;
+    // Edge threshold: edges above this strength block expansion
+    const edgeThreshold = 80 + (255 - preMaskTolerance) * 0.5;
 
-    // Region grow from brush area within growR
+    // Region grow with edge awareness
     const visited = new Uint8Array(w * h);
     const selected = new Uint8Array(w * h);
     const queue = [];
@@ -179,13 +214,11 @@ function quickSelectAt(cx, cy) {
         for (let x = bx0; x < bx1; x++) {
             if (Math.sqrt((x - cx) ** 2 + (y - cy) ** 2) > brushR) continue;
             const pos = y * w + x;
-            const i = pos * 4;
-            const diff = Math.max(Math.abs(px[i] - ar), Math.abs(px[i+1] - ag), Math.abs(px[i+2] - ab));
-            if (diff <= tol) { queue.push(pos); selected[pos] = 1; visited[pos] = 1; }
+            selected[pos] = 1; visited[pos] = 1; queue.push(pos);
         }
     }
 
-    // Expand outward, limited by growR
+    // Expand outward — stopped by edges AND color difference
     while (queue.length > 0) {
         const pos = queue.pop();
         const x = pos % w, y = (pos - x) / w;
@@ -198,7 +231,11 @@ function quickSelectAt(cx, cy) {
             if (visited[npos]) continue;
             visited[npos] = 1;
             const nx = npos % w, ny = (npos - nx) / w;
+            // Distance limit
             if (Math.sqrt((nx - cx) ** 2 + (ny - cy) ** 2) > growR) continue;
+            // Edge barrier: stop at strong edges
+            if (edges[npos] > edgeThreshold) continue;
+            // Color similarity check
             const i = npos * 4;
             const diff = Math.max(Math.abs(px[i] - ar), Math.abs(px[i+1] - ag), Math.abs(px[i+2] - ab));
             if (diff <= tol) { selected[npos] = 1; queue.push(npos); }
@@ -264,4 +301,5 @@ function exitPreMask() {
     preMaskCanvas = null;
     preMaskCtx = null;
     preMaskPixelData = null;
+    preMaskEdgeMap = null;
 }

@@ -32,6 +32,7 @@ var preMaskCtx = null;
 var preMaskMode = 'keep'; // 'keep' | 'remove' | 'wand' | 'quicksel'
 var preMaskHistory = [];
 var preMaskPixelData = null;
+var preMaskEdgeMap = null;
 var preMaskTolerance = 32;
 
 // ===== DOM Refs (assigned by initRemoverDOM) =====
