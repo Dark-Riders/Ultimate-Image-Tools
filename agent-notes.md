@@ -33,8 +33,19 @@
   - `creator-render.js` — main render, badges, store name, QR, diagonal text
   - `creator-interaction.js` — canvas drag/drop, hit detection, keyboard, image upload
   - `creator-controls.js` — DOM refs, event listeners, templates, export
-- `public/creator.js` — **legacy monolith** (kept as backup, not loaded)
-- `public/remover.js` — BG Remover: ES module loading @imgly/background-removal from esm.sh CDN
+- `public/remover/` — BG Remover split into 10 modules using bare `var` globals (NOT namespaced like Creator):
+  - `remover-state.js` — state vars, DOM ref declarations, `initRemoverDOM()` lazy init
+  - `remover-utils.js` — showUI, selectRemoverImage, canvasCoords, updateBrushCursor
+  - `remover-upload.js` — addFiles, renderImageList, compare slider helpers
+  - `remover-process.js` — ensureModelLoaded, processAll (AI background removal)
+  - `remover-premask.js` — pre-mask mode: brush paint, magic wand, quick select
+  - `remover-mask.js` — post-AI mask editor (restore/erase brush)
+  - `remover-compose.js` — compose mode: move/resize cutout on background
+  - `remover-canvas.js` — placeholder (events consolidated into download.js)
+  - `remover-toolbar.js` — setPreMaskTool helper
+  - `remover-download.js` — download, event listeners, bootstrap (DOMContentLoaded init)
+- `public/remover.js` — **DELETED** (was the original 966-line monolith)
+- `docs/` — mirror of `public/` with relative paths (`./`) for GitHub Pages deployment
 - `public/style.css` — premium dark-mode theme, all component styles
 
 ## Key Decisions
@@ -53,6 +64,11 @@
 - Non-PNG inputs are converted to PNG on output to avoid JPEG artifacts destroying watermark transparency.
 - Browser `webkitRelativePath` is used for folder structure tracking but doesn't expose the actual filesystem path.
 - Canvas `fillText` with emojis may render differently across OS/browsers.
+- **CRITICAL: `var` vs `const` global scope collision.** `app.js` uses `const` for variables like `previewContainer`. If a remover script later does `var previewContainer`, it causes a **silent SyntaxError** that kills the entire script — no error appears in the console. Always prefix remover globals (e.g. `rmPreviewContainer`, `selectRemoverImage`, `removerImages`).
+- **CRITICAL: `window.images` is a non-configurable browser built-in** (`document.images` alias). Using `var images` at global scope silently crashes the script. We renamed to `removerImages`.
+- **CSS `display: flex` overrides `hidden` attribute.** If a CSS rule sets `display: flex`, the HTML `hidden` attribute is ignored. Must add explicit `[hidden] { display: none; }` rule.
+- **GitHub Pages relative paths.** `docs/index.html` must use `./` relative paths (not absolute `/`) because GitHub Pages serves from a subdirectory (`/Ultimate-Image-Tools/`).
+- **Remover lazy DOM init.** All remover DOM refs are initialized lazily via `initRemoverDOM()` called from `remover-download.js` on DOMContentLoaded, to ensure the DOM is fully parsed.
 
 ## Open Questions
 - None currently.
