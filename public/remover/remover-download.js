@@ -104,8 +104,12 @@ function initRemoverListeners() {
             maskMode = 'erase'; maskBtnErase.classList.add('active'); maskBtnRestore.classList.remove('active');
         }
     });
-    maskBtnWand.addEventListener('click', () => { if (editorMode === 'premask') setPreMaskTool('wand'); });
-    maskBtnQuickSel.addEventListener('click', () => { if (editorMode === 'premask') setPreMaskTool('quicksel'); });
+    maskBtnWand.addEventListener('click', () => {
+        if (editorMode === 'premask') setPreMaskTool(preMaskMode === 'wand' ? 'keep' : 'wand');
+    });
+    maskBtnQuickSel.addEventListener('click', () => {
+        if (editorMode === 'premask') setPreMaskTool(preMaskMode === 'quicksel' ? 'keep' : 'quicksel');
+    });
     toleranceSlider.addEventListener('input', () => { preMaskTolerance = parseInt(toleranceSlider.value); toleranceVal.textContent = preMaskTolerance; });
     maskBrushSlider.addEventListener('input', () => { maskBrushSize = parseInt(maskBrushSlider.value); maskBrushVal.textContent = maskBrushSize; });
     maskBtnUndo.addEventListener('click', () => {
