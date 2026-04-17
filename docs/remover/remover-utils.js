@@ -28,8 +28,8 @@ function showUI(opts) {
 
 // Fit canvas to container maintaining aspect ratio
 function fitCanvasToContainer() {
-    const cw = previewContainer.clientWidth;
-    const ch = previewContainer.clientHeight;
+    const cw = rmPreviewContainer.clientWidth;
+    const ch = rmPreviewContainer.clientHeight;
     if (!cw || !ch || !editorCanvas.width || !editorCanvas.height) return;
     const canvasRatio = editorCanvas.width / editorCanvas.height;
     const containerRatio = cw / ch;
@@ -45,7 +45,7 @@ function fitCanvasToContainer() {
     editorCanvas.style.top = ((ch - dh) / 2) + 'px';
 }
 
-function selectImage(index) {
+function selectRemoverImage(index) {
     selectedIndex = index;
     const img = removerImages[index];
     if (!img) return;
@@ -90,7 +90,7 @@ function canvasTouchCoords(e) {
 }
 
 function updateBrushCursor(e) {
-    const rect = previewContainer.getBoundingClientRect();
+    const rect = rmPreviewContainer.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const size = maskBrushSize * 2;

@@ -110,7 +110,7 @@ function initRemoverListeners() {
     });
     maskBtnCancel.addEventListener('click', () => {
         if (editorMode === 'premask') exitPreMask();
-        exitEditor(); if (selectedIndex >= 0) selectImage(selectedIndex);
+        exitEditor(); if (selectedIndex >= 0) selectRemoverImage(selectedIndex);
     });
     maskBtnApply.addEventListener('click', async () => {
         if (editorMode === 'premask') { applyPreMask(); return; }
@@ -121,7 +121,7 @@ function initRemoverListeners() {
             img.resultBlob = blob; img.resultUrl = URL.createObjectURL(blob);
             renderResults();
         }
-        exitEditor(); if (selectedIndex >= 0) selectImage(selectedIndex);
+        exitEditor(); if (selectedIndex >= 0) selectRemoverImage(selectedIndex);
     });
 
     // Compose toolbar
@@ -163,7 +163,7 @@ function initRemoverListeners() {
             renderCompose();
         }, 'image/png');
     });
-    composeBtnClose.addEventListener('click', () => { exitEditor(); if (selectedIndex >= 0) selectImage(selectedIndex); });
+    composeBtnClose.addEventListener('click', () => { exitEditor(); if (selectedIndex >= 0) selectRemoverImage(selectedIndex); });
 
     // Canvas events
     editorCanvas.addEventListener('mousedown', (e) => {

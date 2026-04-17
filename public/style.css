@@ -1647,6 +1647,9 @@ input[type="number"]:focus {
   padding: 8px 0;
   align-items: center;
 }
+.remover-mask-toolbar[hidden] {
+  display: none;
+}
 
 .mask-tool-group {
   display: flex;

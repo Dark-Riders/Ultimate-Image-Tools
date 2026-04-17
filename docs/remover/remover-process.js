@@ -54,5 +54,5 @@ processBtn.addEventListener('click', async () => {
     processing = false; updateProcessBtn();
     if (doneCount > 0) { downloadSection.hidden = false; renderResults(); }
     const firstDone = removerImages.findIndex(i => i.status === 'done');
-    if (firstDone >= 0) selectImage(firstDone);
+    if (firstDone >= 0) selectRemoverImage(firstDone);
 });

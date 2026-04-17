@@ -11,7 +11,7 @@ function addFiles(fileList) {
         });
     }
     renderImageList();
-    if (removerImages.length > 0) { selectImage(removerImages.length - 1); }
+    if (removerImages.length > 0) { selectRemoverImage(removerImages.length - 1); }
 }
 
 function renderImageList() {
@@ -34,9 +34,9 @@ function renderImageList() {
             removerImages.splice(i, 1);
             if (selectedIndex >= removerImages.length) selectedIndex = removerImages.length - 1;
             renderImageList();
-            if (selectedIndex >= 0) selectImage(selectedIndex); else hidePreview();
+            if (selectedIndex >= 0) selectRemoverImage(selectedIndex); else hidePreview();
         });
-        item.addEventListener('click', () => selectImage(i));
+        item.addEventListener('click', () => selectRemoverImage(i));
         imageList.appendChild(item);
     });
     updateProcessBtn();

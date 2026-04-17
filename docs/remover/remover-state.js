@@ -39,7 +39,7 @@ var dropzone, fileInput, browseLink, imageList, countBadge;
 var processBtn, progressWrap, progressFill, statusText;
 var downloadSection, downloadAllBtn, emptyState;
 var compareContainer, beforeImg, afterImg, compareSlider;
-var resultsContainer, previewContainer;
+var resultsContainer, rmPreviewContainer;
 var editorCanvas, editorCtx, brushCursor;
 var maskToolbar, maskBtnRestore, maskBtnErase;
 var maskBrushSlider, maskBrushVal;
@@ -69,7 +69,7 @@ function initRemoverDOM() {
     afterImg = document.getElementById('remover-after-img');
     compareSlider = document.getElementById('remover-compare-slider');
     resultsContainer = document.getElementById('remover-results');
-    previewContainer = document.getElementById('remover-preview-container');
+    rmPreviewContainer = document.getElementById('remover-preview-container');
 
     editorCanvas = document.getElementById('remover-editor-canvas');
     editorCtx = editorCanvas ? editorCanvas.getContext('2d', { willReadFrequently: true }) : null;

@@ -236,7 +236,7 @@ function applyPreMask() {
         updateProcessBtn();
         downloadSection.hidden = false;
         renderResults();
-        selectImage(selectedIndex);
+        selectRemoverImage(selectedIndex);
         statusText.textContent = '✅ Pre-mask applied! AI bypassed.';
         progressWrap.hidden = false;
         setTimeout(() => { progressWrap.hidden = true; }, 2000);
