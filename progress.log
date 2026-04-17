@@ -111,3 +111,24 @@
 - Rebuilt `docs/` with relative paths for GitHub Pages
 - Updated `agent-notes.md` with critical gotchas about global scope collisions
 - Files: `remover-state.js`, `remover-utils.js`, `remover-upload.js`, `remover-process.js`, `remover-premask.js`, `remover-download.js`, `style.css`, `agent-notes.md`, `docs/*`
+
+## 2026-04-17 09:20
+- Fixed 🪄 Wand emoji rendering as square — replaced with ◇ Unicode diamond, ✨ Quick → ⬡ hexagon
+- Added `preMaskAction` keep/remove toggle for Wand and Quick Select tools
+- Both tools now respect keep/remove mode when applying selection to mask
+- Toggle off: clicking active Wand/Quick button deselects back to Keep brush
+- Files: `index.html`, `remover-toolbar.js`, `remover-premask.js`, `remover-download.js`
+
+## 2026-04-17 09:33
+- Implemented edge-aware Quick Select using Sobel edge detection
+- Pre-computes edge map (grayscale → Sobel gradient magnitude) on premask enter
+- Region growing now stops at strong edges AND color boundaries
+- Edge threshold scales inversely with tolerance for natural interaction
+- Added keyboard shortcuts: `[` `]` brush size ±5, `{` `}` tolerance ±5, `Ctrl+Z` undo
+- Added `preMaskEdgeMap` state variable
+- Files: `remover-premask.js`, `remover-download.js`, `remover-state.js`
+
+## 2026-04-17 09:37
+- Updated `agent.md` rules: no auto-delete originals, docs on request only, no auto-push
+- Created `universal-agent.md` — portable version of project rules for reuse across projects
+- Files: `agent.md`, `universal-agent.md`
