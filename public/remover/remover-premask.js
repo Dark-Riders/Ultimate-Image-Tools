@@ -8,6 +8,7 @@ async function enterPreMask() {
     if (!img) return;
     editorMode = 'premask';
     preMaskMode = 'keep';
+    preMaskAction = 'keep';
     preMaskHistory = [];
 
     // Show canvas and reuse mask toolbar (same buttons)
@@ -132,7 +133,11 @@ function magicWandAt(startX, startY) {
     for (let i = 0; i < selected.length; i++) {
         if (selected[i]) {
             const j = i * 4;
-            md[j] = 255; md[j+1] = 255; md[j+2] = 255; md[j+3] = 255;
+            if (preMaskAction === 'keep') {
+                md[j] = 255; md[j+1] = 255; md[j+2] = 255; md[j+3] = 255;
+            } else {
+                md[j] = 0; md[j+1] = 0; md[j+2] = 0; md[j+3] = 0;
+            }
         }
     }
     preMaskCtx.putImageData(maskData, 0, 0);
@@ -206,7 +211,11 @@ function quickSelectAt(cx, cy) {
     for (let i = 0; i < selected.length; i++) {
         if (selected[i]) {
             const j = i * 4;
-            md[j] = 255; md[j+1] = 255; md[j+2] = 255; md[j+3] = 255;
+            if (preMaskAction === 'keep') {
+                md[j] = 255; md[j+1] = 255; md[j+2] = 255; md[j+3] = 255;
+            } else {
+                md[j] = 0; md[j+1] = 0; md[j+2] = 0; md[j+3] = 0;
+            }
         }
     }
     preMaskCtx.putImageData(maskData, 0, 0);

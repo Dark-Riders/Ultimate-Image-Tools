@@ -82,12 +82,27 @@ function initRemoverListeners() {
 
     // Mask toolbar
     maskBtnRestore.addEventListener('click', () => {
-        if (editorMode === 'premask') setPreMaskTool('keep');
-        else { maskMode = 'restore'; maskBtnRestore.classList.add('active'); maskBtnErase.classList.remove('active'); }
+        if (editorMode === 'premask') {
+            // If currently in wand/quicksel, just switch action to keep
+            if (preMaskMode === 'wand' || preMaskMode === 'quicksel') {
+                setPreMaskAction('keep');
+            } else {
+                setPreMaskTool('keep');
+            }
+        } else {
+            maskMode = 'restore'; maskBtnRestore.classList.add('active'); maskBtnErase.classList.remove('active');
+        }
     });
     maskBtnErase.addEventListener('click', () => {
-        if (editorMode === 'premask') setPreMaskTool('remove');
-        else { maskMode = 'erase'; maskBtnErase.classList.add('active'); maskBtnRestore.classList.remove('active'); }
+        if (editorMode === 'premask') {
+            if (preMaskMode === 'wand' || preMaskMode === 'quicksel') {
+                setPreMaskAction('remove');
+            } else {
+                setPreMaskTool('remove');
+            }
+        } else {
+            maskMode = 'erase'; maskBtnErase.classList.add('active'); maskBtnRestore.classList.remove('active');
+        }
     });
     maskBtnWand.addEventListener('click', () => { if (editorMode === 'premask') setPreMaskTool('wand'); });
     maskBtnQuickSel.addEventListener('click', () => { if (editorMode === 'premask') setPreMaskTool('quicksel'); });
