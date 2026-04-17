@@ -18,27 +18,23 @@ Before making any changes or responding to any request in this project, you **MU
 
 ## Mandatory Post-Task Updates
 
-After completing **every** task (no matter how small), you **MUST** do the following:
+Documentation files (`README.md`, `progress.log`, `agent-notes.md`, `ideas.md`) should **only be updated when the user explicitly asks**. However, after completing every task, you **MUST remind** the user that the documentation files haven't been updated yet and ask if they'd like you to update them.
 
-1. **Update `README.md`** — Document any changes that affect the project's architecture, features, setup, configuration, or usage. Keep the documentation accurate and up to date.
-2. **Append to `progress.log`** — Log **every single change**, even the tiniest modification. Each entry should include:
-   - Timestamp (YYYY-MM-DD HH:MM)
-   - Brief description of what was changed
-   - Files affected
-3. **Update `agent-notes.md`** — Add any new insights, open questions, or "gotchas" you encountered during the task.
-4. **Update `ideas.md`** — If a task sparks new ideas or resolves an existing one, update accordingly. Mark implemented ideas with ✅.
+## Git Rules
 
-No change is too small to log. Even a one-line fix, a renamed variable, or a config tweak must be recorded in `progress.log`.
+1. **Always commit** after completing a task or a logical chunk of work.
+2. **Never push** unless the user explicitly asks you to push. Always remind the user that changes have been committed but not pushed.
 
 ## JavaScript File Structure Rules
 
 1. **Max ~300 lines per JS file.** Before writing any JS file, verify that the planned content will fit within this limit. If it won't, split it into multiple files upfront — don't create monoliths that need refactoring later.
 2. **Folder-based modules.** When multiple JS files share functions/state (e.g., `creator/`, `remover/`), group them into a dedicated folder. Each file in the folder should have a clear, single responsibility.
 3. **Splitting existing files.** When a file grows beyond ~300 lines and must be split:
-   - Keep the original file intact until the split is verified.
+   - **Never delete the original file.** Keep it intact as a backup. Only delete it when the user explicitly asks you to, after they have tested and confirmed the split files work correctly.
    - After creating all new split files, **compare** the combined content of the split files against the original to ensure nothing was lost or duplicated.
+   - **Verify all connected files.** Check every file that imports, references, or interacts with the original file. Identify all variable names, function names, and DOM references used across files and verify there are no **global scope collisions** (e.g., `const` vs `var` redeclaration, `window` built-in conflicts).
    - **Test for bugs** — load the app and verify all functionality works with the new split files.
-   - Only **delete the original file** after confirming the split is correct and bug-free.
+   - **Remind the user** that the original file still exists and hasn't been deleted, and ask if they'd like to delete it after testing.
 
 ## Workflow
 
@@ -48,7 +44,6 @@ No change is too small to log. Even a one-line fix, a renamed variable, or a con
 4. Read `ideas.md`
 5. Understand current context
 6. Proceed with the task
-7. Update `README.md` with relevant documentation
-8. Append all changes to `progress.log`
-9. Update `agent-notes.md` with insights
-10. Update `ideas.md` if applicable
+7. Commit changes
+8. Remind user: documentation not yet updated, push not yet done
+
