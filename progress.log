@@ -1,79 +1,23 @@
 # Progress Log
 
-## 2026-03-02 13:24
-- Initial project setup
-- Created `CLAUDE.md` with universal project rules (adapted from MP-to-Sheets-automation-CLAUDE-opt-ver)
-- Created `README.md`, `progress.log`, `agent-notes.md` scaffold files
-- Files affected: `CLAUDE.md`, `README.md`, `progress.log`, `agent-notes.md`
+## Current State
 
-## 2026-03-02 13:31
-- Added `ideas.md` as 4th mandatory file in `CLAUDE.md` (pre-read, post-task update, workflow)
-- Created `ideas.md` scaffold
-- Files affected: `CLAUDE.md`, `ideas.md`, `progress.log`
+**Version**: 1.5.1 | **Repo**: `Dark-Riders/Ultimate-Image-Tools` | **Deployed**: GitHub Pages (`docs/`)
 
-## 2026-03-02 13:45
-- Implemented bulk watermark applier tool (v1.0.0)
-- Created `package.json` with Sharp dependency, `tsconfig.json` for Bun+TS
-- Created `src/apply-watermark.ts` — CLI tool supporting multiple watermarks, output subfolders per watermark
-- Ran `bun install` (sharp@0.33.5, typescript@5.9.3)
-- Tested with 9 product images (temp/brewog/) + 1 watermark (temp/hafiliamall.png) — all 9 passed
-- Updated `README.md` with full usage documentation
-- Files affected: `package.json`, `tsconfig.json`, `src/apply-watermark.ts`, `README.md`, `progress.log`, `agent-notes.md`
+**Architecture**: 3-tab app (Applier / Creator / BG Remover) served by Bun HTTP server on port 19683.
+- **Applier** (`app.js`): Bulk watermark overlay with drag & drop, folder uploads, ZIP download.
+- **Creator** (`public/creator/`, 10 files): Watermark template builder using `window.Creator` namespace. 40 borders, badges, QR, diagonal text.
+- **BG Remover** (`public/remover/`, 10 files): AI background removal + manual tools. Uses bare `var` globals with lazy DOM init. Features: pre-mask (keep/remove brush, magic wand, edge-aware quick select with Sobel), post-mask editor, compose mode.
+- **Server** (`src/server.ts`): Bun + Sharp, serves static files and processes watermark API requests.
+- **Docs** (`docs/`): Mirror of `public/` with `./` relative paths for GitHub Pages.
 
-## 2026-03-02 13:53
-- Added web GUI (v1.1.0) — dark mode interface on port 19683 (3^9)
-- Created `src/server.ts` (Bun HTTP server with /api/preview and /api/process endpoints)
-- Created `public/index.html`, `public/style.css`, `public/app.js` (frontend)
-- Added `dev` script to `package.json`
-- Updated `README.md` with GUI docs
-- Files affected: `src/server.ts`, `public/index.html`, `public/style.css`, `public/app.js`, `package.json`, `README.md`, `progress.log`, `agent-notes.md`
+**Key shortcuts** (mask/premask mode): `[ ]` brush size, `{ }` tolerance, `Ctrl+Z` undo.
 
-## 2026-03-02 14:05
-- Implemented folder structure preservation (v1.2.0)
-- GUI: Added "Add Folder" button with `webkitdirectory`, folder labels on thumbnails, relative paths sent to server
-- Server: reads relative paths and creates matching subfolders in output
-- CLI: `-i` flag now repeatable for multiple folders; output preserves folder names as subfolders
-- Files affected: `src/server.ts`, `src/apply-watermark.ts`, `public/index.html`, `public/style.css`, `public/app.js`, `progress.log`
+**Critical gotchas**: See `agent-notes.md` § Gotchas — especially global scope collisions (`const` vs `var`, `window.images`) and CSS hidden attribute override.
 
-## 2026-03-02 14:19
-- Implemented smart output logic
-- CLI: default output = `<source_folder>/output` (flat); custom `-o` preserves folder structure
-- GUI: tracks if user modified output path; sends `preserveStructure` flag to server
-- Server: conditionally preserves folder structure based on flag
-- Files affected: `src/apply-watermark.ts`, `src/server.ts`, `public/app.js`, `progress.log`
+> Older entries archived in `progress-archive.log`.
 
-## 2026-03-02 14:34
-- GUI now outputs a downloadable ZIP instead of writing to disk
-- Replaced `archiver` with `jszip` (Bun compatibility)
-- Server `/api/process` returns `application/zip` response
-- Removed output folder path from GUI (no longer needed)
-- Button changed to "Process & Download" with download icon
-- ZIP preserves folder structure: `<watermark_name>/<source_folder>/<image.png>`
-- Files affected: `src/server.ts`, `public/index.html`, `public/app.js`, `package.json`, `progress.log`
-
-## 2026-03-02 14:54
-- Added watermark Creator tab (v1.3.0)
-- Tab system: Applier / Creator toggle in header
-- Creator features: 4 border styles (simple, double, angular, corners), color picker, thickness slider, 4 badge presets, optional store name, live canvas preview, PNG export
-- New files: `public/creator.js`
-- Files affected: `public/index.html`, `public/style.css`, `public/creator.js`, `progress.log`
-
-## 2026-03-02 15:05
-- Enhanced watermark Creator
-- 8 border styles: simple, double, angular, corners, layered, bracket, rounded, inset
-- 3 fill modes: solid, gradient (diagonal), diagonal stripes (pattern)
-- 3 color pickers: Color 1, Color 2, Accent
-- Fully customizable badges: add/remove with editable emoji, text, color, position
-- Files affected: `public/index.html`, `public/style.css`, `public/creator.js`
-
-## 2026-03-02 15:16
-- Added 12 shopping-related badge presets as clickable chips
-- Presets: Gratis Ongkir, Bayar Ditempat, Bisa COD, Special Discount, Harga Murah, Best Seller, Premium Quality, Promo, Ready Stock, Original 100%, Bonus Gift, Flash Sale
-- "+" Add button now creates a blank customizable badge
-- Files affected: `public/creator.js`, `public/index.html`, `public/style.css`
-
-## 2026-03-02 15:23
-- Updated all documentation: `progress.log`, `README.md`, `agent-notes.md`, `ideas.md`
+---
 
 ## 2026-04-15 16:50
 - Refactored `creator.js` (2871 lines) into 10 modular files in `public/creator/` folder
@@ -132,3 +76,10 @@
 - Updated `agent.md` rules: no auto-delete originals, docs on request only, no auto-push
 - Created `universal-agent.md` — portable version of project rules for reuse across projects
 - Files: `agent.md`, `universal-agent.md`
+
+## 2026-04-17 09:42
+- Refined `agent.md` and `universal-agent.md` with: TLDR pre-reads, progress log archiving (30-day rolling), meaningful commit messages, explicit reminder as final workflow step
+- Added `## Current State` section to top of `progress.log`
+- Archived March 2026 entries to `progress-archive.log`
+- Updated `README.md`, `agent-notes.md`, `ideas.md` with BG Remover features
+- Files: `agent.md`, `universal-agent.md`, `progress.log`, `progress-archive.log`, `README.md`, `agent-notes.md`, `ideas.md`

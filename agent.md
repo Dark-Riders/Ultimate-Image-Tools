@@ -4,17 +4,10 @@
 
 Before making any changes or responding to any request in this project, you **MUST** read the following files first:
 
-1. **`README.md`** — Contains the full project documentation, architecture, and setup instructions. Read this to understand the project context.
-2. **`progress.log`** — Contains a chronological record of all changes made to this project. Read this to understand the current state and recent modifications.
-3. **`agent-notes.md`** — Contains high-level context, future roadmap ideas, and "lessons learned" from previous agents. Read this to avoid repeating mistakes.
-4. **`ideas.md`** — Contains ideas, considerations, and features under discussion. Read this to understand what's planned or being explored.
-
-## Why
-
-- `README.md` ensures you understand the project's purpose, structure, and conventions before making any changes.
-- `progress.log` ensures you are aware of the latest changes and don't duplicate, conflict with, or regress any recent work.
-- `agent-notes.md` provides continuity of thought and helps you understand the "why" behind certain decisions.
-- `ideas.md` tracks what's being considered so you don't re-propose existing ideas or miss context on planned features.
+1. **`README.md`** — Project documentation, architecture, and setup instructions.
+2. **`progress.log`** — Chronological record of all changes. **Read the `## Current State` section at the top first** — only read older entries if you need historical context.
+3. **`agent-notes.md`** — High-level context, architecture details, and "lessons learned". This is the most important file for avoiding repeated mistakes.
+4. **`ideas.md`** — Ideas, considerations, and features under discussion.
 
 ## Mandatory Post-Task Updates
 
@@ -22,7 +15,7 @@ Documentation files (`README.md`, `progress.log`, `agent-notes.md`, `ideas.md`) 
 
 ## Git Rules
 
-1. **Always commit** after completing a task or a logical chunk of work.
+1. **Always commit** after completing a task or a logical chunk of work. Use **meaningful commit messages** that describe what and why — not just "fix" or "update".
 2. **Never push** unless the user explicitly asks you to push. Always remind the user that changes have been committed but not pushed.
 
 ## JavaScript File Structure Rules
@@ -36,14 +29,18 @@ Documentation files (`README.md`, `progress.log`, `agent-notes.md`, `ideas.md`) 
    - **Test for bugs** — load the app and verify all functionality works with the new split files.
    - **Remind the user** that the original file still exists and hasn't been deleted, and ask if they'd like to delete it after testing.
 
+## Progress Log Maintenance
+
+- `progress.log` must have a `## Current State` section at the top that summarizes the latest architecture and recent changes. Update this section whenever you update the log.
+- Keep only the **last 30 days** of detailed entries in `progress.log`. When updating, move older entries to `progress-archive.log`.
+
 ## Workflow
 
 1. Read `README.md`
-2. Read `progress.log`
+2. Read `progress.log` (start with `## Current State`)
 3. Read `agent-notes.md`
 4. Read `ideas.md`
 5. Understand current context
 6. Proceed with the task
-7. Commit changes
-8. Remind user: documentation not yet updated, push not yet done
-
+7. Commit changes with meaningful commit messages
+8. **Remind user**: documentation not yet updated, push not yet done
