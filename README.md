@@ -93,6 +93,22 @@ Create custom watermark templates directly in the browser:
 - **Undo/Redo**: Ctrl+Z / Ctrl+Y support
 - **Export**: PNG, JPEG, or WebP with quality control
 
+### BG Remover Tab
+
+AI-powered background removal with manual editing tools:
+
+- **AI Background Removal**: Uses `@imgly/background-removal` (loaded from esm.sh CDN)
+- **Pre-Mask Mode**: Manual object selection before AI processing
+  - **Keep/Remove brush**: Paint to select areas to keep or remove
+  - **Magic Wand**: Click to select similar colors (flood-fill)
+  - **Edge-Aware Quick Select**: Smart brush with Sobel edge detection — snaps to object boundaries
+  - **Keep/Remove toggle**: Both Wand and Quick Select support adding to or erasing from selection
+- **Post-Mask Editing**: Refine AI results with restore/erase brushes
+- **Compose Mode**: Move, resize, and place cutout on custom backgrounds (transparent, white, black, custom color)
+- **Batch Processing**: Upload multiple images, process all at once
+- **Before/After Compare**: Slider comparison of original vs result
+- **Keyboard Shortcuts**: `[ ]` brush size, `{ }` tolerance, `Ctrl+Z` undo
+
 ## Tech Stack
 
 - **Runtime**: Bun
@@ -101,3 +117,6 @@ Create custom watermark templates directly in the browser:
 - **ZIP**: JSZip
 - **GUI**: Vanilla HTML/CSS/JS + Bun HTTP server
 - **Creator Architecture**: 10 modular files in `public/creator/` using `window.Creator` namespace
+- **Remover Architecture**: 10 modular files in `public/remover/` using bare `var` globals with lazy DOM init
+- **AI Model**: `@imgly/background-removal` via esm.sh CDN (~40MB, browser-cached)
+

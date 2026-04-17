@@ -38,12 +38,12 @@
   - `remover-utils.js` — showUI, selectRemoverImage, canvasCoords, updateBrushCursor
   - `remover-upload.js` — addFiles, renderImageList, compare slider helpers
   - `remover-process.js` — ensureModelLoaded, processAll (AI background removal)
-  - `remover-premask.js` — pre-mask mode: brush paint, magic wand, quick select
+  - `remover-premask.js` — pre-mask mode: brush paint, magic wand, edge-aware quick select (Sobel), keep/remove action
   - `remover-mask.js` — post-AI mask editor (restore/erase brush)
   - `remover-compose.js` — compose mode: move/resize cutout on background
   - `remover-canvas.js` — placeholder (events consolidated into download.js)
-  - `remover-toolbar.js` — setPreMaskTool helper
-  - `remover-download.js` — download, event listeners, bootstrap (DOMContentLoaded init)
+  - `remover-toolbar.js` — setPreMaskTool, setPreMaskAction, preMaskAction state
+  - `remover-download.js` — download, event listeners, keyboard shortcuts, bootstrap (DOMContentLoaded init)
 - `public/remover.js` — **DELETED** (was the original 966-line monolith)
 - `docs/` — mirror of `public/` with relative paths (`./`) for GitHub Pages deployment
 - `public/style.css` — premium dark-mode theme, all component styles
@@ -69,6 +69,9 @@
 - **CSS `display: flex` overrides `hidden` attribute.** If a CSS rule sets `display: flex`, the HTML `hidden` attribute is ignored. Must add explicit `[hidden] { display: none; }` rule.
 - **GitHub Pages relative paths.** `docs/index.html` must use `./` relative paths (not absolute `/`) because GitHub Pages serves from a subdirectory (`/Ultimate-Image-Tools/`).
 - **Remover lazy DOM init.** All remover DOM refs are initialized lazily via `initRemoverDOM()` called from `remover-download.js` on DOMContentLoaded, to ensure the DOM is fully parsed.
+- **Emoji rendering.** Some emojis (e.g. 🪄) render as squares on certain platforms. Use Unicode symbols (◇, ⬡) instead for toolbar buttons.
+- **Sobel edge map.** `preMaskEdgeMap` is pre-computed once in `enterPreMask()` and used by `quickSelectAt()`. Must be cleaned up in `exitPreMask()`. The edge threshold scales inversely with tolerance.
+- **Keyboard shortcuts.** `[` `]` brush size ±5, `{` `}` tolerance ±5, `Ctrl+Z` undo. Only active in mask/premask editor mode.
 
 ## Open Questions
 - None currently.

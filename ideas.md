@@ -31,11 +31,13 @@ Things I'm considering but haven't committed to implementing yet.
 ## BG Remover / Pre-Mask Enhancements
 - [ ] **Contiguous Toggle** — Add `☑ Contiguous` checkbox for Wand/Quick Select (default ON). When OFF, select ALL matching pixels globally instead of flood-fill.
 - [ ] **Smooth Edges (Anti-Aliasing)** — Add `☑ Smooth Edges` toggle. Apply 1-2px Gaussian falloff at selection boundaries for natural blending.
-- [ ] **Edge-Aware Quick Select (Sobel)** — Precompute Sobel gradient map. Scale tolerance down near strong edges so Quick Select snaps to object boundaries.
+- [x] **Edge-Aware Quick Select (Sobel)** — ✅ Precompute Sobel gradient map. Tolerance scales down near strong edges so Quick Select snaps to object boundaries.
+- [x] **Keep/Remove Toggle for Wand & Quick Select** — ✅ Both tools support keep (add to mask) and remove (erase from mask) actions.
+- [x] **Keyboard Shortcuts** — ✅ `[ ]` brush size ±5, `{ }` tolerance ±5, `Ctrl+Z` undo.
 
 ## General
 - [—] PWA support (offline-capable) — *(skipped — runs locally via bun)*
-- [—] Keyboard shortcuts for common actions — *(skipped — key ones already done: Ctrl+Z/Y, Delete)*
+- [x] Keyboard shortcuts for common actions — ✅ `[ ]` brush size, `{ }` tolerance, `Ctrl+Z/Y` undo/redo, `Delete` remove
 - [x] File size optimization on export (compress PNGs)
 - [—] Multi-language support (EN/ID) — *(skipped — personal tool)*
 - [x] **Dark Mode Toggle** — Toggle between neo-brutalism light theme and dark mode variant. Swap CSS variables.
