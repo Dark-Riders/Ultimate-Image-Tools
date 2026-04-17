@@ -1,6 +1,6 @@
-# simple-wm-applier
+# Ultimate Image Tools
 
-A bulk watermark/border applier + creator toolkit built with **Bun + TypeScript + Sharp**.
+A bulk watermark/border applier, creator toolkit, and AI background remover built with **Bun + TypeScript + Sharp**.
 
 ## Requirements
 

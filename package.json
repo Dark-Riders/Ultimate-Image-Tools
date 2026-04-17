@@ -1,7 +1,7 @@
 {
-  "name": "simple-wm-applier",
+  "name": "ultimate-image-tools",
   "version": "1.5.0",
-  "description": "Bulk watermark/border applier using Sharp",
+  "description": "Ultimate Image Tools — bulk watermark applier, creator, and AI background remover",
   "type": "module",
   "scripts": {
     "apply": "bun run src/apply-watermark.ts",
