@@ -22,8 +22,8 @@ async function ensureModelLoaded() {
     }
 }
 
-// ===== Process =====
-processBtn.addEventListener('click', async () => {
+// Process all pending images (called from initRemoverListeners in remover-download.js)
+async function processAllImages() {
     if (processing || removerImages.length === 0) return;
     processing = true; processBtn.disabled = true;
     progressWrap.hidden = false; downloadSection.hidden = true;
@@ -55,4 +55,4 @@ processBtn.addEventListener('click', async () => {
     if (doneCount > 0) { downloadSection.hidden = false; renderResults(); }
     const firstDone = removerImages.findIndex(i => i.status === 'done');
     if (firstDone >= 0) selectRemoverImage(firstDone);
-});
+}

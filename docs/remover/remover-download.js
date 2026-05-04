@@ -32,29 +32,7 @@ function initRemoverListeners() {
     document.addEventListener('touchend', () => { window._sliderDrag = false; });
 
     // Process button
-    processBtn.addEventListener('click', async () => {
-        if (processing) return;
-        const pending = removerImages.filter(i => i.status !== 'done');
-        if (pending.length === 0) return;
-        processing = true; processBtn.disabled = true;
-        progressWrap.hidden = false; downloadSection.hidden = true;
-        let done = 0;
-        for (const img of pending) {
-            statusText.textContent = `⏳ Processing ${img.name}...`;
-            progressFill.style.width = ((done / pending.length) * 100) + '%';
-            try {
-                await ensureModelLoaded();
-                const blob = await removeBackground(img.file);
-                img.resultBlob = blob; img.resultUrl = URL.createObjectURL(blob); img.status = 'done';
-            } catch (err) { console.error('BG removal failed:', err); img.status = 'error'; }
-            done++;
-        }
-        progressFill.style.width = '100%';
-        statusText.textContent = '✅ All done!';
-        processing = false; processBtn.disabled = true;
-        renderResults();
-        if (removerImages.some(i => i.status === 'done')) { downloadSection.hidden = false; }
-    });
+    processBtn.addEventListener('click', () => processAllImages());
 
     // Download all
     downloadAllBtn.addEventListener('click', async () => {
