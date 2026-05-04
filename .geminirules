@@ -1,0 +1,6 @@
+# Agent Rules
+
+All rules are defined in `agent.md`. Read that file first.
+
+This file exists only because some tools read `.geminirules` automatically.
+The canonical rules live in `agent.md` — do not duplicate them here.
