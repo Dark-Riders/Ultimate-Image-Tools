@@ -79,6 +79,23 @@ function initRemoverListeners() {
     btnEditMask.addEventListener('click', () => { if (selectedIndex >= 0 && removerImages[selectedIndex]?.status === 'done') enterMaskEditor(); });
     btnCompose.addEventListener('click', () => { if (selectedIndex >= 0 && removerImages[selectedIndex]?.status === 'done') enterCompose(); });
     btnPreMask.addEventListener('click', () => { if (selectedIndex >= 0) enterPreMask(); });
+    btnSendAnnotater.addEventListener('click', () => {
+        if (selectedIndex < 0) return;
+        const img = removerImages[selectedIndex];
+        if (!img || !img.resultBlob) return;
+        const imgEl = new Image();
+        imgEl.onload = () => {
+            antLoadImage(imgEl, img.name);
+            // Switch to Annotater tab
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const antBtn = document.querySelector('[data-tab="annotater"]');
+            if (antBtn) antBtn.classList.add('active');
+            const antTab = document.getElementById('tab-annotater');
+            if (antTab) antTab.classList.add('active');
+        };
+        imgEl.src = img.resultUrl;
+    });
 
     // Mask toolbar
     maskBtnRestore.addEventListener('click', () => {

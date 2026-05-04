@@ -62,6 +62,7 @@ function selectRemoverImage(index) {
     btnEditMask.hidden = !isDone;
     btnCompose.hidden = !isDone;
     btnDlSingle.hidden = !isDone;
+    btnSendAnnotater.hidden = !isDone;
     renderImageList();
 }
 
