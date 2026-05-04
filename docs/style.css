@@ -1710,9 +1710,13 @@ input[type="number"]:focus {
 /* ===== Action Bar ===== */
 
 .remover-action-bar {
-  display: flex;
+  display: none;
   gap: 6px;
   padding: 8px 0;
+}
+
+.remover-action-bar:not([hidden]) {
+  display: flex;
 }
 
 .remover-action-btn {
@@ -1760,14 +1764,14 @@ input[type="number"]:focus {
   padding: 0;
 }
 
-/* ===== Annotater Tab ===== */
+/* ===== Annotator Tab ===== */
 
-.annotater-controls {
+.annotator-controls {
   max-height: calc(100vh - 80px);
   overflow-y: auto;
 }
 
-.annotater-preview-container {
+.annotator-preview-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1780,12 +1784,12 @@ input[type="number"]:focus {
   overflow: auto;
 }
 
-[data-theme="dark"] .annotater-preview-container {
+[data-theme="dark"] .annotator-preview-container {
   background:
     repeating-conic-gradient(#333 0% 25%, #444 0% 50%) 0 0 / 20px 20px;
 }
 
-#annotater-canvas {
+#annotator-canvas {
   max-width: 100%;
   max-height: 70vh;
   box-shadow: var(--shadow-lg);

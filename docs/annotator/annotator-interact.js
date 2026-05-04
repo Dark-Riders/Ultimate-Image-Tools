@@ -1,4 +1,4 @@
-// ===== Annotater — Interaction (Drag, Hit Detection, Keyboard) =====
+// ===== Annotator — Interaction (Drag, Hit Detection, Keyboard) =====
 // Mouse and touch events for dragging text/image objects on canvas.
 
 function antCanvasToLogical(e) {
@@ -170,7 +170,7 @@ function antInitTouchEvents() {
 function antInitKeyboard() {
     document.addEventListener('keydown', function (e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-        // Only act when Annotater tab is visible
+        // Only act when Annotator tab is visible
         if (!antCanvas || !antCanvas.offsetParent) return;
 
         // Ctrl+Z undo

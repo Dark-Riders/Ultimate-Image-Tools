@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════
 // Paint to select objects, magic wand, quick select.
 
-async function enterPreMask() {
+async function enterPreMask(aiResultUrl) {
     const img = removerImages[selectedIndex];
     if (!img) return;
     editorMode = 'premask';
@@ -42,11 +42,31 @@ async function enterPreMask() {
     // Pre-compute Sobel edge map for edge-aware quick select
     preMaskEdgeMap = computeEdgeMap(preMaskPixelData);
 
-    // Create mask canvas (empty = nothing selected)
+    // Create mask canvas
     preMaskCanvas = document.createElement('canvas');
     preMaskCanvas.width = w; preMaskCanvas.height = h;
     preMaskCtx = preMaskCanvas.getContext('2d', { willReadFrequently: true });
     preMaskCtx.clearRect(0, 0, w, h);
+
+    // If AI result provided, pre-fill mask from AI's alpha channel
+    if (aiResultUrl) {
+        const aiImg = await loadImage(aiResultUrl);
+        const aiC = document.createElement('canvas'); aiC.width = w; aiC.height = h;
+        const aiCtx = aiC.getContext('2d', { willReadFrequently: true });
+        aiCtx.drawImage(aiImg, 0, 0, w, h);
+        const aiData = aiCtx.getImageData(0, 0, w, h);
+        // Extract alpha channel: alpha > 128 = keep (white), else = remove (transparent)
+        const maskData = preMaskCtx.getImageData(0, 0, w, h);
+        for (let i = 0; i < aiData.data.length; i += 4) {
+            if (aiData.data[i + 3] > 128) {
+                maskData.data[i] = 255;     // R
+                maskData.data[i + 1] = 255; // G
+                maskData.data[i + 2] = 255; // B
+                maskData.data[i + 3] = 255; // A
+            }
+        }
+        preMaskCtx.putImageData(maskData, 0, 0);
+    }
 
     pushPreMaskHistory();
     renderPreMask();

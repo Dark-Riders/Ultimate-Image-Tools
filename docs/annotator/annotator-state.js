@@ -1,5 +1,5 @@
-// ===== Annotater — State & DOM Refs =====
-// Global state for the Annotater tab. All vars use 'ant' prefix to avoid collisions.
+// ===== Annotator — State & DOM Refs =====
+// Global state for the Annotator tab. All vars use 'ant' prefix to avoid collisions.
 
 // Canvas
 var antCanvas = null;
@@ -39,7 +39,7 @@ var antFontList = [
     'Space Mono', 'Archivo Black',
 ];
 
-// ===== DOM Refs (assigned by initAnnotaterDOM) =====
+// ===== DOM Refs (assigned by initAnnotatorDOM) =====
 var antUploadInput = null;
 var antDropzone = null;
 var antBrowseLink = null;
@@ -54,9 +54,9 @@ var antBgColorPicker = null;
 var antExportBtn = null;
 var antCanvasContainer = null;
 
-function initAnnotaterDOM() {
-    antCanvas = document.getElementById('annotater-canvas');
-    if (!antCanvas) { console.warn('[Annotater] Canvas not found'); return; }
+function initAnnotatorDOM() {
+    antCanvas = document.getElementById('annotator-canvas');
+    if (!antCanvas) { console.warn('[Annotator] Canvas not found'); return; }
     antCtx = antCanvas.getContext('2d');
     antCanvas.width = antCanvasW;
     antCanvas.height = antCanvasH;
@@ -75,7 +75,7 @@ function initAnnotaterDOM() {
     antExportBtn = document.getElementById('ant-export');
     antCanvasContainer = document.getElementById('ant-canvas-container');
 
-    console.log('[Annotater] DOM refs initialized. ✅');
+    console.log('[Annotator] DOM refs initialized. ✅');
 }
 
 function antPushHistory() {

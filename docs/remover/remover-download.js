@@ -57,19 +57,24 @@ function initRemoverListeners() {
     btnEditMask.addEventListener('click', () => { if (selectedIndex >= 0 && removerImages[selectedIndex]?.status === 'done') enterMaskEditor(); });
     btnCompose.addEventListener('click', () => { if (selectedIndex >= 0 && removerImages[selectedIndex]?.status === 'done') enterCompose(); });
     btnPreMask.addEventListener('click', () => { if (selectedIndex >= 0) enterPreMask(); });
-    btnSendAnnotater.addEventListener('click', () => {
+    btnRefineMask.addEventListener('click', () => {
+        if (selectedIndex >= 0 && removerImages[selectedIndex]?.status === 'done') {
+            enterPreMask(removerImages[selectedIndex].resultUrl);
+        }
+    });
+    btnSendAnnotator.addEventListener('click', () => {
         if (selectedIndex < 0) return;
         const img = removerImages[selectedIndex];
         if (!img || !img.resultBlob) return;
         const imgEl = new Image();
         imgEl.onload = () => {
             antLoadImage(imgEl, img.name);
-            // Switch to Annotater tab
+            // Switch to Annotator tab
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            const antBtn = document.querySelector('[data-tab="annotater"]');
+            const antBtn = document.querySelector('[data-tab="annotator"]');
             if (antBtn) antBtn.classList.add('active');
-            const antTab = document.getElementById('tab-annotater');
+            const antTab = document.getElementById('tab-annotator');
             if (antTab) antTab.classList.add('active');
         };
         imgEl.src = img.resultUrl;

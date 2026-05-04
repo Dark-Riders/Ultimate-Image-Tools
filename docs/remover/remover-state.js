@@ -47,7 +47,7 @@ var maskBrushSlider, maskBrushVal;
 var maskBtnUndo, maskBtnReset, maskBtnCancel, maskBtnApply;
 var selectionToolsGroup, maskBtnWand, maskBtnQuickSel;
 var toleranceGroup, toleranceSlider, toleranceVal;
-var actionBar, btnPreMask, btnEditMask, btnCompose, btnDlSingle, btnSendAnnotater;
+var actionBar, btnPreMask, btnEditMask, btnRefineMask, btnCompose, btnDlSingle, btnSendAnnotator;
 var composeToolbar, composeBgType, composeBgColor;
 var composeScaleSlider, composeScaleVal;
 var composeBtnReset, composeBtnApply, composeBtnExport, composeBtnClose;
@@ -95,9 +95,10 @@ function initRemoverDOM() {
     actionBar = document.getElementById('remover-action-bar');
     btnPreMask = document.getElementById('btn-pre-mask');
     btnEditMask = document.getElementById('btn-edit-mask');
+    btnRefineMask = document.getElementById('btn-refine-mask');
     btnCompose = document.getElementById('btn-compose');
     btnDlSingle = document.getElementById('btn-dl-single');
-    btnSendAnnotater = document.getElementById('btn-send-annotater');
+    btnSendAnnotator = document.getElementById('btn-send-annotator');
 
     composeToolbar = document.getElementById('remover-compose-toolbar');
     composeBgType = document.getElementById('compose-bg-type');

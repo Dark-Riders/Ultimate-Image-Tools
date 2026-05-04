@@ -60,9 +60,10 @@ function selectRemoverImage(index) {
     const isDone = img.status === 'done';
     btnPreMask.hidden = isDone;
     btnEditMask.hidden = !isDone;
+    btnRefineMask.hidden = !isDone;
     btnCompose.hidden = !isDone;
     btnDlSingle.hidden = !isDone;
-    btnSendAnnotater.hidden = !isDone;
+    btnSendAnnotator.hidden = !isDone;
     renderImageList();
 }
 

@@ -1,4 +1,4 @@
-// ===== Annotater — Canvas Rendering =====
+// ===== Annotator — Canvas Rendering =====
 // Draws background, image, text objects, selection handles, and snap guides.
 
 function antRender() {

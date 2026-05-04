@@ -1,7 +1,7 @@
-// ===== Annotater — Controls & Bootstrap =====
+// ===== Annotator — Controls & Bootstrap =====
 // DOM listeners, text list rendering, font picker, image upload, export, init.
 
-// ===== Image loading (used by both upload and BG Remover "Send to Annotater") =====
+// ===== Image loading (used by both upload and BG Remover "Send to Annotator") =====
 function antLoadImage(imgEl, name) {
     var maxDim = Math.min(antCanvasW, antCanvasH) * 0.8;
     var w = imgEl.naturalWidth || imgEl.width;
@@ -111,7 +111,7 @@ function antRenderTextList() {
 }
 
 // ===== Init listeners =====
-function initAnnotaterListeners() {
+function initAnnotatorListeners() {
     if (!antCanvas) return;
 
     // Image upload
@@ -243,12 +243,12 @@ function initAnnotaterListeners() {
     antFitCanvas();
     antRender();
 
-    console.log('[Annotater] ✅ All listeners attached.');
+    console.log('[Annotator] ✅ All listeners attached.');
 }
 
 // ===== Bootstrap =====
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { initAnnotaterDOM(); initAnnotaterListeners(); });
+    document.addEventListener('DOMContentLoaded', function () { initAnnotatorDOM(); initAnnotatorListeners(); });
 } else {
-    initAnnotaterDOM(); initAnnotaterListeners();
+    initAnnotatorDOM(); initAnnotatorListeners();
 }
