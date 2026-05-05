@@ -937,7 +937,13 @@
           </div>
           <div id="ant-dropzone" class="dropzone" style="min-height:80px;margin-bottom:8px">
             <p>Drop image here or <a href="#" id="ant-browse-link">browse</a></p>
-            <input type="file" id="ant-file-input" accept="image/*" hidden>
+            <input type="file" id="ant-file-input" accept="image/*" multiple hidden>
+          </div>
+          <div id="ant-queue-list" class="ant-queue-list"></div>
+          <div id="ant-batch-nav" class="ant-batch-nav" hidden>
+            <button id="ant-batch-prev" class="remover-action-btn" style="padding:2px 8px;font-size:11px">◀</button>
+            <span id="ant-batch-counter" class="ant-batch-counter">0 / 0</span>
+            <button id="ant-batch-next" class="remover-action-btn" style="padding:2px 8px;font-size:11px">▶</button>
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
             <span style="font-size:11px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="ant-image-info">No image loaded</span>
@@ -955,6 +961,10 @@
           <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
             <h2>Text Objects</h2>
             <button id="ant-add-text" class="remover-action-btn" style="font-size:11px;padding:2px 10px">+ Add Text</button>
+          </div>
+          <div class="ant-edit-mode">
+            <label><input type="radio" name="ant-edit-mode" value="all" checked> Apply to All</label>
+            <label><input type="radio" name="ant-edit-mode" value="single"> This Image Only</label>
           </div>
           <div id="ant-text-list" class="ant-text-list"></div>
         </section>
@@ -1006,6 +1016,9 @@
           <button id="ant-export" class="btn-process" style="width:100%">
             ⬇ Download PNG
           </button>
+          <button id="ant-export-all" class="btn-process" style="width:100%;margin-top:6px;background:var(--success)" hidden>
+            📦 Export All as ZIP
+          </button>
         </section>
       </div>
 
@@ -1049,6 +1062,7 @@
   <script src="./annotator/annotator-render.js"></script>
   <script src="./annotator/annotator-interact.js"></script>
   <script src="./annotator/annotator-templates.js"></script>
+  <script src="./annotator/annotator-batch.js"></script>
   <script src="./annotator/annotator-controls.js"></script>
   <script>
     // Tab switching

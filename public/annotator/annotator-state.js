@@ -7,10 +7,16 @@ var antCtx = null;
 var antCanvasW = 1000;
 var antCanvasH = 1000;
 
-// Image state (one image per canvas)
+// Image state (current displayed image)
 var antImage = null; // { el, name, x, y, w, h, baseW, baseH, scale }
 
-// Text objects
+// Batch image queue
+var antImageQueue = [];        // [{ el, name, naturalW, naturalH, thumbUrl }]
+var antCurrentImageIdx = -1;   // -1 = no image loaded
+var antPerImageTexts = {};     // { [index]: [...textObjects] } — per-image overrides
+var antEditMode = 'all';       // 'all' | 'single'
+
+// Text objects (shared template)
 var antTexts = []; // [{ text, x, y, fontSize, fontFamily, color, bold, italic }]
 
 // Selection & drag
@@ -60,6 +66,12 @@ var antTplLoadBtn = null;
 var antTplDeleteBtn = null;
 var antTplExportBtn = null;
 var antTplImportInput = null;
+var antBatchNavBar = null;
+var antBatchPrev = null;
+var antBatchNext = null;
+var antBatchCounter = null;
+var antQueueList = null;
+var antExportAllBtn = null;
 
 function initAnnotatorDOM() {
     antCanvas = document.getElementById('annotator-canvas');
@@ -88,6 +100,12 @@ function initAnnotatorDOM() {
     antTplDeleteBtn = document.getElementById('ant-tpl-delete');
     antTplExportBtn = document.getElementById('ant-tpl-export');
     antTplImportInput = document.getElementById('ant-tpl-import');
+    antBatchNavBar = document.getElementById('ant-batch-nav');
+    antBatchPrev = document.getElementById('ant-batch-prev');
+    antBatchNext = document.getElementById('ant-batch-next');
+    antBatchCounter = document.getElementById('ant-batch-counter');
+    antQueueList = document.getElementById('ant-queue-list');
+    antExportAllBtn = document.getElementById('ant-export-all');
 
     console.log('[Annotator] DOM refs initialized. ✅');
 }

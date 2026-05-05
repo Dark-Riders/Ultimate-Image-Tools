@@ -117,25 +117,58 @@ function antRenderTextList() {
 function initAnnotatorListeners() {
     if (!antCanvas) return;
 
-    // Image upload
+    // Image upload (multi-file, adds to queue)
     antBrowseLink.addEventListener('click', function (e) { e.preventDefault(); antUploadInput.click(); });
     antUploadInput.addEventListener('change', function () {
-        var file = antUploadInput.files[0];
-        if (!file || !file.type.startsWith('image/')) return;
-        var img = new Image();
-        img.onload = function () { antLoadImage(img, file.name); };
-        img.src = URL.createObjectURL(file);
+        var files = antUploadInput.files;
+        if (!files || files.length === 0) return;
+        var startIdx = antImageQueue.length;
+        var loaded = 0;
+        for (var f = 0; f < files.length; f++) {
+            (function (file) {
+                if (!file.type.startsWith('image/')) return;
+                var img = new Image();
+                img.onload = function () {
+                    antImageQueue.push({
+                        el: img, name: file.name,
+                        naturalW: img.naturalWidth, naturalH: img.naturalHeight,
+                        thumbUrl: URL.createObjectURL(file)
+                    });
+                    loaded++;
+                    // Navigate to first new image if nothing was loaded before
+                    if (loaded === 1 && startIdx === 0) antNavigateTo(0);
+                    antUpdateBatchUI();
+                };
+                img.src = URL.createObjectURL(file);
+            })(files[f]);
+        }
         antUploadInput.value = '';
     });
     antDropzone.addEventListener('dragover', function (e) { e.preventDefault(); antDropzone.classList.add('drag-over'); });
     antDropzone.addEventListener('dragleave', function () { antDropzone.classList.remove('drag-over'); });
     antDropzone.addEventListener('drop', function (e) {
         e.preventDefault(); antDropzone.classList.remove('drag-over');
-        var file = e.dataTransfer.files[0];
-        if (!file || !file.type.startsWith('image/')) return;
-        var img = new Image();
-        img.onload = function () { antLoadImage(img, file.name); };
-        img.src = URL.createObjectURL(file);
+        var files = e.dataTransfer.files;
+        if (!files || files.length === 0) return;
+        var startIdx = antImageQueue.length;
+        var loaded = 0;
+        for (var f = 0; f < files.length; f++) {
+            (function (file) {
+                if (!file.type.startsWith('image/')) return;
+                var img = new Image();
+                img.onload = function () {
+                    antImageQueue.push({
+                        el: img, name: file.name,
+                        naturalW: img.naturalWidth, naturalH: img.naturalHeight,
+                        thumbUrl: URL.createObjectURL(file)
+                    });
+                    loaded++;
+                    if (loaded === 1 && startIdx === 0) antNavigateTo(0);
+                    antUpdateBatchUI();
+                };
+                img.src = URL.createObjectURL(file);
+            })(files[f]);
+        }
     });
 
     // Image scale
@@ -149,15 +182,19 @@ function initAnnotatorListeners() {
         antRender();
     });
 
-    // Clear image
+    // Clear image (removes current from queue)
     antClearImageBtn.addEventListener('click', function () {
-        antPushHistory();
-        antImage = null;
-        antImageInfo.textContent = 'No image loaded';
-        antClearImageBtn.hidden = true;
-        antImageScaleSlider.value = 100;
-        antImageScaleVal.textContent = '100%';
-        antRender();
+        if (antCurrentImageIdx >= 0 && antImageQueue.length > 0) {
+            antRemoveFromQueue(antCurrentImageIdx);
+        } else {
+            antPushHistory();
+            antImage = null;
+            antImageInfo.textContent = 'No image loaded';
+            antClearImageBtn.hidden = true;
+            antImageScaleSlider.value = 100;
+            antImageScaleVal.textContent = '100%';
+            antRender();
+        }
     });
 
     // Add text
@@ -239,6 +276,9 @@ function initAnnotatorListeners() {
     // Template system (from annotator-templates.js)
     initAnnotatorTemplateListeners();
 
+    // Batch mode (from annotator-batch.js)
+    initAnnotatorBatchListeners();
+
     // Init interaction events
     antInitMouseEvents();
     antInitTouchEvents();
@@ -251,6 +291,7 @@ function initAnnotatorListeners() {
     // Restore last template & populate dropdown
     antRefreshTplDropdown();
     antRestoreLastTemplate();
+    antUpdateBatchUI();
 
     console.log('[Annotator] ✅ All listeners attached.');
 }

@@ -68,7 +68,17 @@ function initRemoverListeners() {
         if (!img || !img.resultBlob) return;
         const imgEl = new Image();
         imgEl.onload = () => {
-            antLoadImage(imgEl, img.name);
+            // Ensure annotator DOM is initialized
+            if (!antCanvas) initAnnotatorDOM();
+            // Append to annotator queue
+            antImageQueue.push({
+                el: imgEl, name: img.name,
+                naturalW: imgEl.naturalWidth, naturalH: imgEl.naturalHeight,
+                thumbUrl: URL.createObjectURL(img.resultBlob)
+            });
+            // Navigate to the new entry
+            antNavigateTo(antImageQueue.length - 1);
+            antUpdateBatchUI();
             // Switch to Annotator tab
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
