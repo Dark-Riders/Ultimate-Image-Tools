@@ -1455,6 +1455,19 @@ input[type="number"]:focus {
   box-shadow: var(--shadow);
 }
 
+/* Remover: dark workspace for panel-right */
+#tab-remover .panel-right {
+  background: #2a2a2e;
+}
+
+#tab-remover .panel-right .panel-header {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] #tab-remover .panel-right {
+  background: #1a1a1e;
+}
+
 /* Preview Container */
 .remover-preview-container {
   position: relative;
@@ -1468,10 +1481,10 @@ input[type="number"]:focus {
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
   background-color: var(--checker-b);
-  border: 2.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 4px 24px rgba(0,0,0,0.4);
 }
 
 .remover-empty-state {
