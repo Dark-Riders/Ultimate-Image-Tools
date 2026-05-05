@@ -975,6 +975,32 @@
           </div>
         </section>
 
+        <!-- Template Section -->
+        <section class="section">
+          <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+            <h2>Templates</h2>
+          </div>
+          <p style="font-size:10px;color:var(--text-muted);margin-bottom:6px">Save text layout presets (fonts, sizes, positions). Image not included.</p>
+          <div style="display:flex;gap:4px;margin-bottom:6px">
+            <input type="text" id="ant-tpl-name" class="ant-text-input" placeholder="Template name" style="flex:1">
+            <button id="ant-tpl-save" class="remover-action-btn" style="font-size:11px;padding:2px 10px">💾 Save</button>
+          </div>
+          <select id="ant-tpl-list" class="ant-font-select" style="width:100%;margin-bottom:6px">
+            <option value="">— Select template —</option>
+          </select>
+          <div style="display:flex;gap:4px;margin-bottom:6px">
+            <button id="ant-tpl-load" class="remover-action-btn" style="flex:1;font-size:11px;padding:3px 6px">📂 Load</button>
+            <button id="ant-tpl-delete" class="remover-action-btn" style="flex:1;font-size:11px;padding:3px 6px;background:var(--danger,#e63946);color:white;border-color:var(--danger,#e63946)">🗑 Delete</button>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button id="ant-tpl-export" class="remover-action-btn" style="flex:1;font-size:11px;padding:3px 6px">⬇ Export JSON</button>
+            <label class="remover-action-btn" style="flex:1;font-size:11px;padding:3px 6px;cursor:pointer;text-align:center;display:inline-flex;align-items:center;justify-content:center">
+              ⬆ Import
+              <input type="file" id="ant-tpl-import" accept=".json" hidden>
+            </label>
+          </div>
+        </section>
+
         <!-- Export Section -->
         <section class="section">
           <button id="ant-export" class="process-btn" style="width:100%">
@@ -1022,6 +1048,7 @@
   <script src="./annotator/annotator-state.js"></script>
   <script src="./annotator/annotator-render.js"></script>
   <script src="./annotator/annotator-interact.js"></script>
+  <script src="./annotator/annotator-templates.js"></script>
   <script src="./annotator/annotator-controls.js"></script>
   <script>
     // Tab switching

@@ -53,6 +53,13 @@ var antBgSelect = null;
 var antBgColorPicker = null;
 var antExportBtn = null;
 var antCanvasContainer = null;
+var antTplName = null;
+var antTplList = null;
+var antTplSaveBtn = null;
+var antTplLoadBtn = null;
+var antTplDeleteBtn = null;
+var antTplExportBtn = null;
+var antTplImportInput = null;
 
 function initAnnotatorDOM() {
     antCanvas = document.getElementById('annotator-canvas');
@@ -74,6 +81,13 @@ function initAnnotatorDOM() {
     antBgColorPicker = document.getElementById('ant-bg-color');
     antExportBtn = document.getElementById('ant-export');
     antCanvasContainer = document.getElementById('ant-canvas-container');
+    antTplName = document.getElementById('ant-tpl-name');
+    antTplList = document.getElementById('ant-tpl-list');
+    antTplSaveBtn = document.getElementById('ant-tpl-save');
+    antTplLoadBtn = document.getElementById('ant-tpl-load');
+    antTplDeleteBtn = document.getElementById('ant-tpl-delete');
+    antTplExportBtn = document.getElementById('ant-tpl-export');
+    antTplImportInput = document.getElementById('ant-tpl-import');
 
     console.log('[Annotator] DOM refs initialized. ✅');
 }

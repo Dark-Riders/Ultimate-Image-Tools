@@ -69,11 +69,14 @@ function antRenderTextList() {
             if (antSelectedIndex === i) { antSelectedIndex = -1; antSelectedType = null; }
             antRenderTextList(); antRender();
         });
-        // Font
-        item.querySelector('.ant-font-select').addEventListener('change', function (e) {
+        // Font — listen to both 'input' (arrow key navigation) and 'change' (click/Enter)
+        var fontSelect = item.querySelector('.ant-font-select');
+        function antUpdateFont(e) {
             antTexts[i].fontFamily = e.target.value;
             antRender();
-        });
+        }
+        fontSelect.addEventListener('input', antUpdateFont);
+        fontSelect.addEventListener('change', antUpdateFont);
         // Size
         item.querySelector('.ant-size-slider').addEventListener('input', function (e) {
             antTexts[i].fontSize = parseInt(e.target.value);
@@ -233,6 +236,9 @@ function initAnnotatorListeners() {
         antRender();
     });
 
+    // Template system (from annotator-templates.js)
+    initAnnotatorTemplateListeners();
+
     // Init interaction events
     antInitMouseEvents();
     antInitTouchEvents();
@@ -241,7 +247,10 @@ function initAnnotatorListeners() {
     // Fit canvas on resize
     window.addEventListener('resize', antFitCanvas);
     antFitCanvas();
-    antRender();
+
+    // Restore last template & populate dropdown
+    antRefreshTplDropdown();
+    antRestoreLastTemplate();
 
     console.log('[Annotator] ✅ All listeners attached.');
 }
