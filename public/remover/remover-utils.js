@@ -52,12 +52,15 @@ function selectRemoverImage(index) {
     editorMode = 'preview';
     emptyState.style.display = 'none';
     showUI({ compare: true, actionBar: true });
-    beforeImg.src = img.originalUrl;
-    afterImg.src = img.resultUrl || img.originalUrl;
-    compareSlider.style.left = '50%';
-    compareContainer.querySelector('.remover-compare-after').style.clipPath = 'inset(0 0 0 50%)';
-    // Show appropriate buttons based on status
+
+    // Show result if done, otherwise original
     const isDone = img.status === 'done';
+    showingOriginal = false;
+    previewImg.src = isDone ? img.resultUrl : img.originalUrl;
+    toggleOriginalBtn.hidden = !isDone;
+    toggleOriginalBtn.textContent = '👁 Show Original';
+
+    // Show appropriate buttons based on status
     btnPreMask.hidden = isDone;
     btnEditMask.hidden = !isDone;
     btnRefineMask.hidden = !isDone;

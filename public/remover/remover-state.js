@@ -39,7 +39,8 @@ var preMaskTolerance = 32;
 var dropzone, fileInput, browseLink, imageList, countBadge;
 var processBtn, progressWrap, progressFill, statusText;
 var downloadSection, downloadAllBtn, emptyState;
-var compareContainer, beforeImg, afterImg, compareSlider;
+var compareContainer, previewImg, toggleOriginalBtn;
+var showingOriginal = false;
 var resultsContainer, rmPreviewContainer;
 var editorCanvas, editorCtx, brushCursor;
 var maskToolbar, maskBtnRestore, maskBtnErase;
@@ -66,9 +67,8 @@ function initRemoverDOM() {
     downloadAllBtn = document.getElementById('btn-download-all');
     emptyState = document.getElementById('remover-empty-state');
     compareContainer = document.getElementById('remover-compare');
-    beforeImg = document.getElementById('remover-before-img');
-    afterImg = document.getElementById('remover-after-img');
-    compareSlider = document.getElementById('remover-compare-slider');
+    previewImg = document.getElementById('remover-preview-img');
+    toggleOriginalBtn = document.getElementById('remover-toggle-original');
     resultsContainer = document.getElementById('remover-results');
     rmPreviewContainer = document.getElementById('remover-preview-container');
 

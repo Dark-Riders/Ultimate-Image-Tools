@@ -834,19 +834,10 @@
             </svg>
             <p style="color:var(--text-muted);margin-top:8px">Upload images and click process to remove backgrounds</p>
           </div>
-          <!-- Comparison view -->
-          <div id="remover-compare" class="remover-compare" hidden>
-            <div class="remover-compare-layer remover-compare-before">
-              <img id="remover-before-img">
-              <span class="remover-compare-label">BEFORE</span>
-            </div>
-            <div class="remover-compare-layer remover-compare-after">
-              <img id="remover-after-img">
-              <span class="remover-compare-label remover-compare-label-after">AFTER</span>
-            </div>
-            <div class="remover-compare-slider" id="remover-compare-slider">
-              <div class="remover-compare-handle"></div>
-            </div>
+          <!-- Preview view -->
+          <div id="remover-compare" class="remover-preview-view" hidden>
+            <img id="remover-preview-img">
+            <button id="remover-toggle-original" class="remover-toggle-btn" hidden>👁 Show Original</button>
           </div>
           <!-- Editor canvas overlay (shared by mask edit & compose) -->
           <canvas id="remover-editor-canvas" class="remover-mask-canvas" hidden></canvas>

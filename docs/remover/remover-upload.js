@@ -59,11 +59,3 @@ function hidePreview() {
     compareContainer.hidden = true;
     actionBar.hidden = true;
 }
-
-function updateSlider(clientX) {
-    const rect = compareContainer.getBoundingClientRect();
-    let pct = ((clientX - rect.left) / rect.width) * 100;
-    pct = Math.max(0, Math.min(100, pct));
-    compareContainer.querySelector('.remover-compare-after').style.clipPath = `inset(0 0 0 ${pct}%)`;
-    compareSlider.style.left = pct + '%';
-}

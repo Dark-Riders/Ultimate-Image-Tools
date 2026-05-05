@@ -23,13 +23,14 @@ function initRemoverListeners() {
     dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
     dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('drag-over'); addFiles(e.dataTransfer.files); });
 
-    // Compare slider
-    compareSlider.addEventListener('mousedown', () => { window._sliderDrag = true; });
-    document.addEventListener('mousemove', (e) => { if (window._sliderDrag) updateSlider(e.clientX); });
-    document.addEventListener('mouseup', () => { window._sliderDrag = false; });
-    compareSlider.addEventListener('touchstart', (e) => { window._sliderDrag = true; e.preventDefault(); });
-    document.addEventListener('touchmove', (e) => { if (window._sliderDrag) updateSlider(e.touches[0].clientX); });
-    document.addEventListener('touchend', () => { window._sliderDrag = false; });
+    // Toggle original/result
+    toggleOriginalBtn.addEventListener('click', () => {
+        const img = removerImages[selectedIndex];
+        if (!img || !img.resultUrl) return;
+        showingOriginal = !showingOriginal;
+        previewImg.src = showingOriginal ? img.originalUrl : img.resultUrl;
+        toggleOriginalBtn.textContent = showingOriginal ? '👁 Show Result' : '👁 Show Original';
+    });
 
     // Process button
     processBtn.addEventListener('click', () => processAllImages());
