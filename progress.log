@@ -4,64 +4,67 @@
 
 **Version**: 1.5.1 | **Repo**: `Dark-Riders/Ultimate-Image-Tools` | **Deployed**: GitHub Pages (`docs/`)
 
-**Architecture**: 3-tab app (Applier / Creator / BG Remover) served by Bun HTTP server on port 19683.
+**Architecture**: 4-tab app (Applier / Creator / BG Remover / Annotator) served by Bun HTTP server on port 19683.
 - **Applier** (`app.js`): Bulk watermark overlay with drag & drop, folder uploads, ZIP download.
 - **Creator** (`public/creator/`, 10 files): Watermark template builder using `window.Creator` namespace. 40 borders, badges, QR, diagonal text.
-- **BG Remover** (`public/remover/`, 10 files): AI background removal + manual tools. Uses bare `var` globals with lazy DOM init. Features: pre-mask (keep/remove brush, magic wand, edge-aware quick select with Sobel), post-mask editor, compose mode.
+- **BG Remover** (`public/remover/`, 10 files): AI background removal + manual tools. Uses bare `var` globals with lazy DOM init. Features: pre-mask (keep/remove brush, magic wand, edge-aware quick select with Sobel), AI → Refine flow, post-mask editor, compose mode, send to Annotator.
+- **Annotator** (`public/annotator/`, 4 files): Canvas-based text + image editor. Uses `ant`-prefixed `var` globals with lazy DOM init. Features: text objects with custom fonts/size/color, image drag/scale, snap guides, transparent PNG export.
 - **Server** (`src/server.ts`): Bun + Sharp, serves static files and processes watermark API requests.
 - **Docs** (`docs/`): Mirror of `public/` with `./` relative paths for GitHub Pages.
 
 **Key shortcuts** (mask/premask mode): `[ ]` brush size, `{ }` tolerance, `Ctrl+Z` undo.
 
-**Critical gotchas**: See `agent-notes.md` § Gotchas — especially global scope collisions (`const` vs `var`, `window.images`) and CSS hidden attribute override.
+**Critical gotchas**: See `agent-notes.md` § Gotchas — especially global scope collisions (`const` vs `var`, `window.images`), CSS `:not([hidden])` pattern, and top-level addEventListener crash.
 
 > Older entries archived in `progress-archive.log`.
 
 ---
 
-## 2026-04-15 16:50
-- Refactored `creator.js` (2871 lines) into 10 modular files in `public/creator/` folder
-- Split by concern: state, data, utils, styles, borders (3 files), render, interaction, controls
-- Uses `window.Creator` global namespace pattern (no bundler needed)
-- Original `creator.js` preserved untouched as backup
-- Verified with automated comparison script: all 78 functions, 48 draw functions, 40 border keys match
-- Browser tested: zero console errors, full feature parity confirmed
-- Files: `creator-state.js`, `creator-data.js`, `creator-utils.js`, `creator-styles.js`, `creator-borders-basic.js`, `creator-borders-decorative.js`, `creator-borders-artistic.js`, `creator-render.js`, `creator-interaction.js`, `creator-controls.js`
+## 2026-05-04
 
-## 2026-04-15 18:30
-- Added BG Remover tab (v1.4.0) — refactored `remover.js` monolith (966 lines) into 10 modular files in `public/remover/`
-- Modules: state, utils, upload, process, premask, mask, compose, canvas, toolbar, download
-- Features: AI background removal (@imgly/background-removal), manual masking, magic wand, quick select, compose mode
-- Files: all `remover-*.js` in `public/remover/`
+### Annotator Tab (new)
+- Created `public/annotator/` with 4 modules: `annotator-state.js`, `annotator-render.js`, `annotator-interact.js`, `annotator-controls.js`
+- Canvas-based text + image editor with drag/drop, snap guides, keyboard shortcuts
+- Per-text controls: font family (27 Google Fonts), font size slider, color picker, bold/italic toggles
+- Image upload (browse + drag & drop), scale slider, clear button
+- Background selector (transparent/white/black/custom color)
+- PNG export with transparency preserved
+- Files: `public/annotator/*.js`, `public/index.html`, `public/style.css`
 
-## 2026-04-15 19:00
-- Rebranded project to "Ultimate Image Tools" (v1.5.0)
-- Migrated repository to `Dark-Riders/Ultimate-Image-Tools`
-- Set up GitHub Pages deployment from `docs/` folder
-- Files: `package.json`, `README.md`
+### BG Remover → Annotator Integration
+- Added "Annotator" button in remover action bar (visible after AI processing)
+- Loads AI result blob into Annotator canvas and switches tab programmatically
+- Files: `remover-state.js`, `remover-utils.js`, `remover-download.js`, `index.html`
 
-## 2026-04-17 08:10
-- Fixed critical bug: `var images` in remover-state.js collided with `window.images` (non-configurable browser built-in)
-- Renamed `images` → `removerImages` across all remover modules
-- Implemented lazy DOM initialization: `initRemoverDOM()` + `initRemoverListeners()` called via DOMContentLoaded
-- Consolidated all event listeners into `remover-download.js` bootstrap
-- Files: all `remover-*.js` in `public/remover/`
+### AI → Refine Mask Flow
+- Added "Refine" button in remover action bar (visible after AI processing)
+- Opens Pre-Mask with AI's alpha channel pre-filled as initial mask
+- `enterPreMask(aiResultUrl)` extracts alpha > 128 → white (keep) from AI result
+- All pre-mask tools (wand, quick select + Sobel, brush) available for refinement
+- Pre-Mask still works standalone (no args) for offline use
+- Files: `remover-premask.js`, `remover-download.js`, `index.html`
 
-## 2026-04-17 08:57
-- Fixed critical bug: `const previewContainer` (app.js) vs `var previewContainer` (remover-state.js) — silent SyntaxError killed entire script
-- Renamed `previewContainer` → `rmPreviewContainer` in remover modules
-- Renamed `selectImage` → `selectRemoverImage` to avoid function collision with app.js
-- Fixed CSS: `.remover-mask-toolbar` `display:flex` was overriding `hidden` attribute — added `[hidden] { display: none; }` rule
-- Rebuilt `docs/` with relative paths for GitHub Pages
-- Updated `agent-notes.md` with critical gotchas about global scope collisions
-- Files: `remover-state.js`, `remover-utils.js`, `remover-upload.js`, `remover-process.js`, `remover-premask.js`, `remover-download.js`, `style.css`, `agent-notes.md`, `docs/*`
+### Bug Fixes
+- Fixed `processBtn.addEventListener` crash: top-level call before DOM init. Extracted inline logic into `processAllImages()` function, listener now in `initRemoverListeners()`
+- Fixed CSS action bar `[hidden]` override: `.remover-action-bar { display: flex }` was overriding `[hidden]`. Changed to `:not([hidden]) { display: flex }` pattern
+- Files: `remover-process.js`, `remover-download.js`, `style.css`
 
-## 2026-04-17 09:20
-- Fixed 🪄 Wand emoji rendering as square — replaced with ◇ Unicode diamond, ✨ Quick → ⬡ hexagon
-- Added `preMaskAction` keep/remove toggle for Wand and Quick Select tools
-- Both tools now respect keep/remove mode when applying selection to mask
-- Toggle off: clicking active Wand/Quick button deselects back to Keep brush
-- Files: `index.html`, `remover-toolbar.js`, `remover-premask.js`, `remover-download.js`
+### Rename & Cleanup
+- Renamed all `annotater` → `annotator` (directory, files, CSS classes, HTML IDs, JS strings)
+- Synced `docs/` with relative paths
+- Files: all annotator + remover files, `index.html`, `style.css`, `docs/*`
+
+## 2026-04-17 09:42
+- Refined `agent.md` and `universal-agent.md` with: TLDR pre-reads, progress log archiving (30-day rolling), meaningful commit messages, explicit reminder as final workflow step
+- Added `## Current State` section to top of `progress.log`
+- Archived March 2026 entries to `progress-archive.log`
+- Updated `README.md`, `agent-notes.md`, `ideas.md` with BG Remover features
+- Files: `agent.md`, `universal-agent.md`, `progress.log`, `progress-archive.log`, `README.md`, `agent-notes.md`, `ideas.md`
+
+## 2026-04-17 09:37
+- Updated `agent.md` rules: no auto-delete originals, docs on request only, no auto-push
+- Created `universal-agent.md` — portable version of project rules for reuse across projects
+- Files: `agent.md`, `universal-agent.md`
 
 ## 2026-04-17 09:33
 - Implemented edge-aware Quick Select using Sobel edge detection
@@ -72,14 +75,46 @@
 - Added `preMaskEdgeMap` state variable
 - Files: `remover-premask.js`, `remover-download.js`, `remover-state.js`
 
-## 2026-04-17 09:37
-- Updated `agent.md` rules: no auto-delete originals, docs on request only, no auto-push
-- Created `universal-agent.md` — portable version of project rules for reuse across projects
-- Files: `agent.md`, `universal-agent.md`
+## 2026-04-17 09:20
+- Fixed 🪄 Wand emoji rendering as square — replaced with ◇ Unicode diamond, ✨ Quick → ⬡ hexagon
+- Added `preMaskAction` keep/remove toggle for Wand and Quick Select tools
+- Both tools now respect keep/remove mode when applying selection to mask
+- Toggle off: clicking active Wand/Quick button deselects back to Keep brush
+- Files: `index.html`, `remover-toolbar.js`, `remover-premask.js`, `remover-download.js`
 
-## 2026-04-17 09:42
-- Refined `agent.md` and `universal-agent.md` with: TLDR pre-reads, progress log archiving (30-day rolling), meaningful commit messages, explicit reminder as final workflow step
-- Added `## Current State` section to top of `progress.log`
-- Archived March 2026 entries to `progress-archive.log`
-- Updated `README.md`, `agent-notes.md`, `ideas.md` with BG Remover features
-- Files: `agent.md`, `universal-agent.md`, `progress.log`, `progress-archive.log`, `README.md`, `agent-notes.md`, `ideas.md`
+## 2026-04-17 08:57
+- Fixed critical bug: `const previewContainer` (app.js) vs `var previewContainer` (remover-state.js) — silent SyntaxError killed entire script
+- Renamed `previewContainer` → `rmPreviewContainer` in remover modules
+- Renamed `selectImage` → `selectRemoverImage` to avoid function collision with app.js
+- Fixed CSS: `.remover-mask-toolbar` `display:flex` was overriding `hidden` attribute — added `[hidden] { display: none; }` rule
+- Rebuilt `docs/` with relative paths for GitHub Pages
+- Updated `agent-notes.md` with critical gotchas about global scope collisions
+- Files: `remover-state.js`, `remover-utils.js`, `remover-upload.js`, `remover-process.js`, `remover-premask.js`, `remover-download.js`, `style.css`, `agent-notes.md`, `docs/*`
+
+## 2026-04-17 08:10
+- Fixed critical bug: `var images` in remover-state.js collided with `window.images` (non-configurable browser built-in)
+- Renamed `images` → `removerImages` across all remover modules
+- Implemented lazy DOM initialization: `initRemoverDOM()` + `initRemoverListeners()` called via DOMContentLoaded
+- Consolidated all event listeners into `remover-download.js` bootstrap
+- Files: all `remover-*.js` in `public/remover/`
+
+## 2026-04-15 19:00
+- Rebranded project to "Ultimate Image Tools" (v1.5.0)
+- Migrated repository to `Dark-Riders/Ultimate-Image-Tools`
+- Set up GitHub Pages deployment from `docs/` folder
+- Files: `package.json`, `README.md`
+
+## 2026-04-15 18:30
+- Added BG Remover tab (v1.4.0) — refactored `remover.js` monolith (966 lines) into 10 modular files in `public/remover/`
+- Modules: state, utils, upload, process, premask, mask, compose, canvas, toolbar, download
+- Features: AI background removal (@imgly/background-removal), manual masking, magic wand, quick select, compose mode
+- Files: all `remover-*.js` in `public/remover/`
+
+## 2026-04-15 16:50
+- Refactored `creator.js` (2871 lines) into 10 modular files in `public/creator/` folder
+- Split by concern: state, data, utils, styles, borders (3 files), render, interaction, controls
+- Uses `window.Creator` global namespace pattern (no bundler needed)
+- Original `creator.js` preserved untouched as backup
+- Verified with automated comparison script: all 78 functions, 48 draw functions, 40 border keys match
+- Browser tested: zero console errors, full feature parity confirmed
+- Files: `creator-state.js`, `creator-data.js`, `creator-utils.js`, `creator-styles.js`, `creator-borders-basic.js`, `creator-borders-decorative.js`, `creator-borders-artistic.js`, `creator-render.js`, `creator-interaction.js`, `creator-controls.js`

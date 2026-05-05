@@ -1,6 +1,6 @@
 # Ultimate Image Tools
 
-A bulk watermark/border applier, creator toolkit, and AI background remover built with **Bun + TypeScript + Sharp**.
+A bulk watermark/border applier, creator toolkit, AI background remover, and image annotator built with **Bun + TypeScript + Sharp**.
 
 ## Requirements
 
@@ -98,16 +98,31 @@ Create custom watermark templates directly in the browser:
 AI-powered background removal with manual editing tools:
 
 - **AI Background Removal**: Uses `@imgly/background-removal` (loaded from esm.sh CDN)
-- **Pre-Mask Mode**: Manual object selection before AI processing
+- **Pre-Mask Mode**: Manual object selection (standalone or refining AI results)
   - **Keep/Remove brush**: Paint to select areas to keep or remove
   - **Magic Wand**: Click to select similar colors (flood-fill)
   - **Edge-Aware Quick Select**: Smart brush with Sobel edge detection — snaps to object boundaries
   - **Keep/Remove toggle**: Both Wand and Quick Select support adding to or erasing from selection
+- **AI → Refine Flow**: After AI processing, "Refine" button opens Pre-Mask with AI's alpha channel pre-filled, allowing refinement of AI results with the full selection toolset
 - **Post-Mask Editing**: Refine AI results with restore/erase brushes
 - **Compose Mode**: Move, resize, and place cutout on custom backgrounds (transparent, white, black, custom color)
 - **Batch Processing**: Upload multiple images, process all at once
 - **Before/After Compare**: Slider comparison of original vs result
+- **Send to Annotator**: One-click transfer of cleaned image to Annotator tab
 - **Keyboard Shortcuts**: `[ ]` brush size, `{ }` tolerance, `Ctrl+Z` undo
+
+### Annotator Tab
+
+Canvas-based text and image editor for annotating product images:
+
+- **Image loading**: Upload directly or receive from BG Remover via "Annotator" button
+- **Text objects**: Add multiple text items with independent controls
+  - Font family (27 Google Fonts), size (12–200px), color, bold, italic
+  - Free drag positioning with snap-to-center/edge guides
+- **Image manipulation**: Scale slider (10–500%), free drag positioning
+- **Background**: Transparent (checkerboard preview), white, black, or custom color
+- **Export**: PNG with transparency preserved
+- **Keyboard shortcuts**: `Delete` remove selected, `Ctrl+Z` undo
 
 ## Tech Stack
 
@@ -118,5 +133,5 @@ AI-powered background removal with manual editing tools:
 - **GUI**: Vanilla HTML/CSS/JS + Bun HTTP server
 - **Creator Architecture**: 10 modular files in `public/creator/` using `window.Creator` namespace
 - **Remover Architecture**: 10 modular files in `public/remover/` using bare `var` globals with lazy DOM init
+- **Annotator Architecture**: 4 modular files in `public/annotator/` using `ant`-prefixed `var` globals with lazy DOM init
 - **AI Model**: `@imgly/background-removal` via esm.sh CDN (~40MB, browser-cached)
-

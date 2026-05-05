@@ -34,6 +34,15 @@ Things I'm considering but haven't committed to implementing yet.
 - [x] **Edge-Aware Quick Select (Sobel)** — ✅ Precompute Sobel gradient map. Tolerance scales down near strong edges so Quick Select snaps to object boundaries.
 - [x] **Keep/Remove Toggle for Wand & Quick Select** — ✅ Both tools support keep (add to mask) and remove (erase from mask) actions.
 - [x] **Keyboard Shortcuts** — ✅ `[ ]` brush size ±5, `{ }` tolerance ±5, `Ctrl+Z` undo.
+- [x] **AI → Refine Mask Flow** — ✅ After AI processing, "Refine" button opens Pre-Mask with AI's alpha channel pre-filled. Uses all selection tools to refine. Pre-Mask still works standalone for offline use.
+
+## Annotator Enhancements
+- [x] **Annotator Tab** — ✅ 4th tab. Canvas-based text + image editor for annotating product images with product names, prices, etc.
+- [x] **BG Remover → Annotator** — ✅ "Annotator" button sends cleaned image from BG Remover to Annotator tab.
+- [x] **Direct Upload** — ✅ Annotator also accepts direct image uploads (standalone use).
+- [ ] **Text Shadow / Stroke** — Add text outline or drop shadow options for better readability on varied backgrounds.
+- [ ] **Multiple Images per Canvas** — Allow placing multiple images on the same canvas (currently one per canvas).
+- [ ] **Layer Reorder** — Drag text items to change z-order rendering.
 
 ## General
 - [—] PWA support (offline-capable) — *(skipped — runs locally via bun)*
