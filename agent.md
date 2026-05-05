@@ -35,9 +35,9 @@ Documentation files (`README.md`, `progress.log`, `agent-notes.md`, `ideas.md`) 
 1. **Always commit** after completing a task or a logical chunk of work. Use **meaningful commit messages** that describe what and why — not just "fix" or "update".
 2. **Never push** unless the user explicitly asks you to push. Always remind the user that changes have been committed but not pushed.
 
-## File Structure Rules (JS & Python)
+## File Structure Rules (JS, TS & Python)
 
-1. **Max ~300 lines per file.** Before writing any JS or Python file, verify that the planned content will fit within this limit. If it won't, split it into multiple files upfront — don't create monoliths that need refactoring later.
+1. **Max ~300 lines per file.** Before writing any JS, TS, or Python file, verify that the planned content will fit within this limit. If it won't, split it into multiple files upfront — don't create monoliths that need refactoring later.
 2. **Folder-based modules.** When multiple files share functions/state, group them into a dedicated folder. Each file in the folder should have a clear, single responsibility.
 3. **Splitting existing files.** When a file grows beyond ~300 lines and must be split:
    - **Never delete the original file.** Keep it intact as a backup. Only delete it when the user explicitly asks you to, after they have tested and confirmed the split files work correctly.
