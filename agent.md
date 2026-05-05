@@ -35,22 +35,25 @@ Documentation files (`README.md`, `progress.log`, `agent-notes.md`, `ideas.md`) 
 1. **Always commit** after completing a task or a logical chunk of work. Use **meaningful commit messages** that describe what and why — not just "fix" or "update".
 2. **Never push** unless the user explicitly asks you to push. Always remind the user that changes have been committed but not pushed.
 
-## JavaScript File Structure Rules
+## File Structure Rules (JS & Python)
 
-1. **Max ~300 lines per JS file.** Before writing any JS file, verify that the planned content will fit within this limit. If it won't, split it into multiple files upfront — don't create monoliths that need refactoring later.
-2. **Folder-based modules.** When multiple JS files share functions/state (e.g., `creator/`, `remover/`, `annotator/`), group them into a dedicated folder. Each file in the folder should have a clear, single responsibility.
-3. **Global variable prefixes.** Each module folder uses a distinct prefix to prevent scope collisions:
+1. **Max ~300 lines per file.** Before writing any JS or Python file, verify that the planned content will fit within this limit. If it won't, split it into multiple files upfront — don't create monoliths that need refactoring later.
+2. **Folder-based modules.** When multiple files share functions/state, group them into a dedicated folder. Each file in the folder should have a clear, single responsibility.
+3. **Splitting existing files.** When a file grows beyond ~300 lines and must be split:
+   - **Never delete the original file.** Keep it intact as a backup. Only delete it when the user explicitly asks you to, after they have tested and confirmed the split files work correctly.
+   - After creating all new split files, **compare** the combined content of the split files against the original to ensure nothing was lost or duplicated.
+   - **Verify all connected files.** Check every file that imports, references, or interacts with the original file. Identify all variable names, function names, and references used across files and verify there are no collisions or missing imports.
+   - **Test for bugs** — load/run the app and verify all functionality works with the new split files.
+   - **Remind the user** that the original file still exists and hasn't been deleted, and ask if they'd like to delete it after testing.
+
+### JS-Specific Rules
+
+4. **Global variable prefixes.** Each module folder uses a distinct prefix to prevent scope collisions:
    - `creator/` → `window.Creator` namespace
    - `remover/` → bare `var` with `rm`/`remover` prefix
    - `annotator/` → bare `var` with `ant` prefix
    - `app.js` → `const` declarations (Applier tab)
-4. **Lazy DOM initialization.** All module DOM refs must be initialized via `init<Module>DOM()` called on `DOMContentLoaded` — never at file top level. Event listeners must be attached inside `init<Module>Listeners()`, not at file parse time.
-5. **Splitting existing files.** When a file grows beyond ~300 lines and must be split:
-   - **Never delete the original file.** Keep it intact as a backup. Only delete it when the user explicitly asks you to, after they have tested and confirmed the split files work correctly.
-   - After creating all new split files, **compare** the combined content of the split files against the original to ensure nothing was lost or duplicated.
-   - **Verify all connected files.** Check every file that imports, references, or interacts with the original file. Identify all variable names, function names, and DOM references used across files and verify there are no **global scope collisions** (e.g., `const` vs `var` redeclaration, `window` built-in conflicts).
-   - **Test for bugs** — load the app and verify all functionality works with the new split files.
-   - **Remind the user** that the original file still exists and hasn't been deleted, and ask if they'd like to delete it after testing.
+5. **Lazy DOM initialization.** All module DOM refs must be initialized via `init<Module>DOM()` called on `DOMContentLoaded` — never at file top level. Event listeners must be attached inside `init<Module>Listeners()`, not at file parse time.
 
 ## CSS Rules
 
