@@ -19,15 +19,23 @@ function renderImageList() {
     imageList.innerHTML = '';
     countBadge.textContent = removerImages.length;
     removerImages.forEach((img, i) => {
+        const statusLabel = img.status === 'done' ? '✅ Done' : img.status === 'error' ? '❌ Error' : img.status === 'processing' ? '⏳ Processing' : '⏳ Pending';
         const item = document.createElement('div');
-        item.className = 'remover-image-item' + (i === selectedIndex ? ' selected' : '');
-        item.innerHTML = `
-            <img src="${img.originalUrl}" alt="${img.name}">
-            <span class="name">${img.name}</span>
-            <span class="status ${img.status}">${img.status === 'done' ? '✅' : img.status === 'error' ? '❌' : '⏳'}</span>
-            <button class="remove-btn" title="Remove">×</button>
-        `;
-        item.querySelector('.remove-btn').addEventListener('click', (e) => {
+        item.className = 'remover-image-row'
+            + (i === selectedIndex ? ' active' : '')
+            + (img.status === 'done' ? ' done' : '')
+            + (img.status === 'processing' ? ' processing' : '')
+            + (img.status === 'error' ? ' error' : '');
+        item.innerHTML =
+            '<img class="remover-thumb" src="' + img.originalUrl + '" alt="' + img.name + '">' +
+            '<div class="remover-image-info">' +
+                '<span class="remover-image-name">' + img.name + '</span>' +
+                '<span class="remover-image-status">' + statusLabel + '</span>' +
+            '</div>' +
+            '<div class="remover-image-actions">' +
+                '<button class="remover-rm-btn" title="Remove">×</button>' +
+            '</div>';
+        item.querySelector('.remover-rm-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             URL.revokeObjectURL(img.originalUrl);
             if (img.resultUrl) URL.revokeObjectURL(img.resultUrl);
