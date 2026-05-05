@@ -55,7 +55,7 @@ function selectRemoverImage(index) {
     beforeImg.src = img.originalUrl;
     afterImg.src = img.resultUrl || img.originalUrl;
     compareSlider.style.left = '50%';
-    afterImg.style.clipPath = 'inset(0 0 0 50%)';
+    compareContainer.querySelector('.remover-compare-after').style.clipPath = 'inset(0 0 0 50%)';
     // Show appropriate buttons based on status
     const isDone = img.status === 'done';
     btnPreMask.hidden = isDone;
