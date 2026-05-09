@@ -33,6 +33,7 @@
         <button class="tab-btn" data-tab="creator">Creator</button>
         <button class="tab-btn" data-tab="remover">BG Remover</button>
         <button class="tab-btn" data-tab="annotator">Annotator</button>
+        <button class="tab-btn" data-tab="bgcreator">BG Creator</button>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <button id="theme-toggle" style="width:36px;height:36px;border:2.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);font-size:18px;cursor:pointer;box-shadow:var(--shadow-sm);transition:all 150ms ease;display:flex;align-items:center;justify-content:center" title="Toggle dark mode">☀️</button>
@@ -1023,6 +1024,136 @@
         </div>
       </div>
     </main>
+
+    <!-- ==================== BG CREATOR TAB ==================== -->
+    <main class="main tab-content" id="tab-bgcreator">
+      <!-- Left Panel - Controls -->
+      <div class="panel panel-left bgc-controls">
+        <!-- Mode Section -->
+        <section class="section">
+          <div class="section-header"><h2>Mode</h2></div>
+          <select id="bgc-mode" class="style-select" style="width:100%">
+            <option value="solid_texture">Solid + Texture</option>
+            <option value="gradient_texture">Gradient + Texture</option>
+            <option value="pattern">Pattern</option>
+          </select>
+        </section>
+
+        <!-- Color Palette Section -->
+        <section class="section">
+          <div class="section-header"><h2>Color Palette</h2></div>
+          <div id="bgc-palette-grid" class="bgc-palette-grid"></div>
+          <div class="bgc-color-inputs">
+            <div class="bgc-color-row">
+              <label>Base</label>
+              <input type="color" id="bgc-base-color" value="#f5f0eb" class="bgc-color-picker">
+              <input type="text" id="bgc-base-hex" class="bgc-hex-input" value="#f5f0eb" maxlength="7">
+            </div>
+            <div class="bgc-color-row">
+              <label>Second</label>
+              <input type="color" id="bgc-second-color" value="#e8e0d5" class="bgc-color-picker">
+              <input type="text" id="bgc-second-hex" class="bgc-hex-input" value="#e8e0d5" maxlength="7">
+            </div>
+            <div id="bgc-third-group" class="bgc-color-row" hidden>
+              <label>Third</label>
+              <input type="color" id="bgc-third-color" value="#ddd5c8" class="bgc-color-picker">
+              <input type="text" id="bgc-third-hex" class="bgc-hex-input" value="#ddd5c8" maxlength="7">
+            </div>
+          </div>
+        </section>
+
+        <!-- Texture Section -->
+        <section class="section">
+          <div class="section-header"><h2>Texture</h2></div>
+          <select id="bgc-texture" class="style-select" style="width:100%;margin-bottom:6px">
+            <option value="none">None</option>
+            <option value="paper_grain" selected>Paper Grain</option>
+            <option value="linen">Linen</option>
+            <option value="fine_noise">Fine Noise</option>
+            <option value="micro_dot">Micro Dot</option>
+            <option value="soft_canvas">Soft Canvas</option>
+          </select>
+          <div class="bgc-slider-row">
+            <span class="bgc-slider-label">Opacity</span>
+            <input type="range" id="bgc-tex-opacity" min="0" max="100" value="15" class="bgc-slider">
+            <span id="bgc-tex-opacity-val" class="bgc-slider-val">15%</span>
+          </div>
+          <div class="bgc-slider-row">
+            <span class="bgc-slider-label">Scale</span>
+            <input type="range" id="bgc-tex-scale" min="50" max="200" value="100" class="bgc-slider">
+            <span id="bgc-tex-scale-val" class="bgc-slider-val">100%</span>
+          </div>
+        </section>
+
+        <!-- Pattern Section (conditional) -->
+        <section id="bgc-pattern-section" class="section" hidden>
+          <div class="section-header"><h2>Pattern</h2></div>
+          <select id="bgc-pattern" class="style-select" style="width:100%;margin-bottom:6px">
+            <option value="polka_dot">Polka Dot</option>
+            <option value="diagonal_line">Diagonal Line</option>
+            <option value="chevron">Chevron</option>
+            <option value="diamond_grid">Diamond Grid</option>
+            <option value="crosshatch">Crosshatch</option>
+            <option value="scatter_dot">Scatter Dot</option>
+            <option value="wave">Wave</option>
+            <option value="hexagon">Hexagon</option>
+            <option value="confetti">Confetti</option>
+            <option value="terrazzo">Terrazzo</option>
+          </select>
+          <button id="bgc-regenerate" class="btn-process" style="width:100%;padding:6px;font-size:12px">🔄 Regenerate</button>
+        </section>
+
+        <!-- Gradient Section (conditional) -->
+        <section id="bgc-gradient-section" class="section" hidden>
+          <div class="section-header"><h2>Gradient Direction</h2></div>
+          <div class="bgc-angle-row">
+            <div id="bgc-angle-picker" class="bgc-angle-picker">
+              <div class="bgc-angle-track"></div>
+              <div class="bgc-angle-handle"></div>
+            </div>
+            <span id="bgc-angle-val" class="bgc-angle-label">180°</span>
+          </div>
+        </section>
+
+        <!-- Output Section -->
+        <section class="section">
+          <div class="section-header"><h2>Output</h2></div>
+          <select id="bgc-size" class="style-select" style="width:100%;margin-bottom:8px">
+            <option value="800">800 × 800</option>
+            <option value="1000" selected>1000 × 1000</option>
+            <option value="1200">1200 × 1200</option>
+          </select>
+          <button id="bgc-download" class="btn-process" style="width:100%;margin-bottom:6px">
+            ⬇ Generate & Download
+          </button>
+          <button id="bgc-apply" class="btn-process" style="width:100%;background:var(--success);opacity:0.5" disabled>
+            📎 Apply to Image
+          </button>
+        </section>
+      </div>
+
+      <!-- Right Panel - Preview -->
+      <div class="panel panel-right">
+        <div class="section-header"><h2>Preview</h2></div>
+        <div id="bgc-canvas-container" class="preview-container bgc-preview-container">
+          <canvas id="bgc-canvas" width="500" height="500"></canvas>
+          <!-- Ghost silhouette (shown when no product image uploaded) -->
+          <svg id="bgc-ghost" class="bgc-ghost" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+            <rect x="40" y="30" width="120" height="200" rx="16" fill="rgba(0,0,0,0.06)" />
+            <rect x="55" y="240" width="90" height="12" rx="4" fill="rgba(0,0,0,0.04)" />
+          </svg>
+        </div>
+        <!-- Image upload -->
+        <div id="bgc-dropzone" class="dropzone" style="min-height:60px;margin-top:8px">
+          <p style="font-size:11px;margin:0">Drop transparent PNG or <a href="#" id="bgc-browse-link">browse</a></p>
+          <input type="file" id="bgc-file-input" accept="image/png" hidden>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <span style="font-size:11px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="bgc-image-info">No product image</span>
+          <button id="bgc-clear-image" class="remover-action-btn" style="font-size:11px;padding:2px 8px" hidden>Clear</button>
+        </div>
+      </div>
+    </main>
   </div>
 
   <script src="/app.js"></script>
@@ -1055,6 +1186,12 @@
   <script src="/annotator/annotator-templates.js"></script>
   <script src="/annotator/annotator-batch.js"></script>
   <script src="/annotator/annotator-controls.js"></script>
+  <!-- BG Creator modules -->
+  <script src="/bgcreator/bgc-state.js"></script>
+  <script src="/bgcreator/bgc-render.js"></script>
+  <script src="/bgcreator/bgc-textures.js"></script>
+  <script src="/bgcreator/bgc-patterns.js"></script>
+  <script src="/bgcreator/bgc-controls.js"></script>
   <script>
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
