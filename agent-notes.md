@@ -92,5 +92,10 @@
 - **Annotator effects.** Drop shadow uses 360° angle-to-XY offset math. Outer glow uses `destination-over` composite. Effects applied in render, single export, and batch export.
 - **BG Creator patterns.** Seeded PRNG (mulberry32) ensures reproducible organic patterns. Jitter ranges (position, size, rotation, omission) create non-tiled appearance. Regenerate button randomizes seed.
 
+## Git Push (Dark-Riders org)
+- SSH key: `C:\Users\Adimas\.ssh\Dark-Riders`
+- Default SSH key (`id_ed25519`) maps to `tokihiyazuve1` which does NOT have push access
+- Push command: `$env:GIT_SSH_COMMAND="ssh -i C:/Users/Adimas/.ssh/Dark-Riders -o IdentitiesOnly=yes"; git push origin main`
+
 ## Open Questions
 - None currently.
