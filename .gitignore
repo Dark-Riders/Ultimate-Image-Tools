@@ -4,5 +4,6 @@ temp/
 output/
 public/models/
 docs/models/
+.helm-diag/
 *.log
 !progress.log
