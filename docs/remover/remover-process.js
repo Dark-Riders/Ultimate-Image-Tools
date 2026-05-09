@@ -1,18 +1,49 @@
 // ===== Background Remover — AI Processing =====
 // Library loading and background removal processing.
+// Supports local models (offline) with CDN fallback.
+
+// Check if local models are available
+async function checkLocalModels() {
+    try {
+        const resp = await fetch('/models/resources.json', { method: 'HEAD' });
+        return resp.ok;
+    } catch { return false; }
+}
 
 async function ensureModelLoaded() {
     if (removeBackground) return;
-    statusText.textContent = '⏳ Downloading library from CDN...';
     progressWrap.hidden = false;
+    progressFill.style.width = '5%';
+
+    // Check for local models first
+    const hasLocalModels = await checkLocalModels();
+    if (hasLocalModels) {
+        statusText.textContent = '⏳ Loading library (local models available)...';
+    } else {
+        statusText.textContent = '⏳ Loading library from CDN...';
+    }
     progressFill.style.width = '10%';
+
     try {
         const module = await import('https://esm.sh/@imgly/background-removal@1.7.0');
         removeBackground = module.default || module.removeBackground;
         if (!removeBackground) throw new Error('No removeBackground found. Keys: ' + Object.keys(module));
+
+        // Store config for local model path
+        if (hasLocalModels) {
+            window._bgRemoveConfig = {
+                publicPath: '/models/',
+                model: 'isnet_quint8',
+            };
+            console.log('[BG Remover] Using local models from /models/');
+        } else {
+            window._bgRemoveConfig = {};
+            console.log('[BG Remover] Using CDN models (run `bun scripts/download-models.ts` for offline)');
+        }
+
         modelLoaded = true;
         progressFill.style.width = '100%';
-        statusText.textContent = '✅ Model loaded!';
+        statusText.textContent = hasLocalModels ? '✅ Model loaded (offline)!' : '✅ Model loaded (CDN)!';
         setTimeout(() => { progressWrap.hidden = true; }, 1500);
     } catch (err) {
         console.error('[BG Remover] Load failed:', err);
@@ -36,12 +67,13 @@ async function processAllImages() {
         statusText.textContent = '🔄 Processing ' + (i + 1) + '/' + total + ': ' + img.name;
         progressFill.style.width = ((i / total) * 100) + '%';
         try {
-            const blob = await removeBackground(img.file, {
+            const config = Object.assign({}, window._bgRemoveConfig || {}, {
                 progress: (key, current, total) => {
                     if (key === 'compute:inference' && total > 0)
                         progressFill.style.width = (((i + current / total) / pending.length) * 100) + '%';
                 }
             });
+            const blob = await removeBackground(img.file, config);
             img.resultBlob = blob;
             img.resultUrl = URL.createObjectURL(blob);
             img.status = 'done';
