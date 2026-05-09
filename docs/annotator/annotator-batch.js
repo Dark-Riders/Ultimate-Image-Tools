@@ -152,7 +152,7 @@ async function antExportAll() {
                 ectx.fillRect(0, 0, antCanvasW, antCanvasH);
             }
 
-            // Image — center + scale to fit
+            // Image — center + scale to fit, with effects
             var el = entry.el;
             var maxDim = Math.min(antCanvasW, antCanvasH) * 0.8;
             var w = el.naturalWidth || el.width;
@@ -160,16 +160,46 @@ async function antExportAll() {
             var scale = Math.min(maxDim / w, maxDim / h, 1);
             var sw = w * scale, sh = h * scale;
             var ix = (antCanvasW - sw) / 2, iy = (antCanvasH - sh) / 2;
-            ectx.drawImage(el, ix, iy, sw, sh);
 
-            // Texts
+            ectx.save();
+            if (antFxShadow) {
+                var rad = (antFxShadowAngle - 90) * Math.PI / 180;
+                ectx.shadowOffsetX = Math.cos(rad) * antFxShadowDist;
+                ectx.shadowOffsetY = Math.sin(rad) * antFxShadowDist;
+                ectx.shadowBlur = antFxShadowBlur;
+                ectx.shadowColor = 'rgba(0,0,0,' + (antFxShadowOpacity / 100) + ')';
+            }
+            ectx.drawImage(el, ix, iy, sw, sh);
+            ectx.restore();
+
+            if (antFxGlow) {
+                ectx.save();
+                ectx.globalCompositeOperation = 'destination-over';
+                var gr = parseInt(antFxGlowColor.slice(1, 3), 16);
+                var gg = parseInt(antFxGlowColor.slice(3, 5), 16);
+                var gb = parseInt(antFxGlowColor.slice(5, 7), 16);
+                ectx.shadowColor = 'rgba(' + gr + ',' + gg + ',' + gb + ',' + (antFxGlowOpacity / 100) + ')';
+                ectx.shadowBlur = antFxGlowBlur;
+                ectx.drawImage(el, ix, iy, sw, sh);
+                ectx.restore();
+            }
+
+            // Texts with effects
             for (var j = 0; j < texts.length; j++) {
                 var t = texts[j];
                 var style = (t.italic ? 'italic ' : '') + (t.bold ? 'bold ' : '');
+                ectx.save();
                 ectx.font = style + t.fontSize + 'px "' + t.fontFamily + '", sans-serif';
                 ectx.fillStyle = t.color;
                 ectx.textBaseline = 'top';
+                if (antFxTextShadow) {
+                    ectx.shadowOffsetX = 0;
+                    ectx.shadowOffsetY = antFxTShadowY;
+                    ectx.shadowBlur = antFxTShadowBlur;
+                    ectx.shadowColor = antFxTShadowColor;
+                }
                 ectx.fillText(t.text || 'Text', t.x, t.y);
+                ectx.restore();
             }
 
             exportCanvas.toBlob(function (blob) {

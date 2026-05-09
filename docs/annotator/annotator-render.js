@@ -1,5 +1,6 @@
 // ===== Annotator — Canvas Rendering =====
 // Draws background, image, text objects, selection handles, and snap guides.
+// Applies global effects (drop shadow, outer glow, text shadow) when enabled.
 
 function antRender() {
     if (!antCanvas || !antCtx) return;
@@ -15,19 +16,59 @@ function antRender() {
         antCtx.fillRect(0, 0, w, h);
     }
 
-    // 2. Draw image
+    // 2. Draw image WITH effects
     if (antImage && antImage.el) {
+        antCtx.save();
+
+        // Drop shadow on image
+        if (antFxShadow) {
+            var rad = (antFxShadowAngle - 90) * Math.PI / 180;
+            antCtx.shadowOffsetX = Math.cos(rad) * antFxShadowDist;
+            antCtx.shadowOffsetY = Math.sin(rad) * antFxShadowDist;
+            antCtx.shadowBlur = antFxShadowBlur;
+            antCtx.shadowColor = 'rgba(0,0,0,' + (antFxShadowOpacity / 100) + ')';
+        }
+
         antCtx.drawImage(antImage.el, antImage.x, antImage.y, antImage.w, antImage.h);
+        antCtx.restore();
+
+        // Outer glow (draw again with colored shadow, no offset, behind image)
+        if (antFxGlow) {
+            antCtx.save();
+            antCtx.globalCompositeOperation = 'destination-over';
+            antCtx.shadowOffsetX = 0;
+            antCtx.shadowOffsetY = 0;
+            antCtx.shadowBlur = antFxGlowBlur;
+            antCtx.shadowColor = antFxGlowColor.replace('#', '');
+            // Convert hex to rgba
+            var gr = parseInt(antFxGlowColor.slice(1, 3), 16);
+            var gg = parseInt(antFxGlowColor.slice(3, 5), 16);
+            var gb = parseInt(antFxGlowColor.slice(5, 7), 16);
+            antCtx.shadowColor = 'rgba(' + gr + ',' + gg + ',' + gb + ',' + (antFxGlowOpacity / 100) + ')';
+            antCtx.drawImage(antImage.el, antImage.x, antImage.y, antImage.w, antImage.h);
+            antCtx.restore();
+        }
     }
 
-    // 3. Draw text objects
+    // 3. Draw text objects WITH text shadow
     for (var i = 0; i < antTexts.length; i++) {
         var t = antTexts[i];
         var style = (t.italic ? 'italic ' : '') + (t.bold ? 'bold ' : '');
+        antCtx.save();
         antCtx.font = style + t.fontSize + 'px "' + t.fontFamily + '", sans-serif';
         antCtx.fillStyle = t.color;
         antCtx.textBaseline = 'top';
+
+        // Text shadow
+        if (antFxTextShadow) {
+            antCtx.shadowOffsetX = 0;
+            antCtx.shadowOffsetY = antFxTShadowY;
+            antCtx.shadowBlur = antFxTShadowBlur;
+            antCtx.shadowColor = antFxTShadowColor;
+        }
+
         antCtx.fillText(t.text || 'Text', t.x, t.y);
+        antCtx.restore();
     }
 
     // 4. Selection handles

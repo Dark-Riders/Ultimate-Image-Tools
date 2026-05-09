@@ -2,13 +2,14 @@
 
 ## Current State
 
-**Version**: 1.5.1 | **Repo**: `Dark-Riders/Ultimate-Image-Tools` | **Deployed**: GitHub Pages (`docs/`)
+**Version**: 1.6.0 | **Repo**: `Dark-Riders/Ultimate-Image-Tools` | **Deployed**: GitHub Pages (`docs/`)
 
-**Architecture**: 4-tab app (Applier / Creator / BG Remover / Annotator) served by Bun HTTP server on port 19683.
+**Architecture**: 5-tab app (Applier / Creator / BG Remover / Annotator / BG Creator) served by Bun HTTP server on port 19683.
 - **Applier** (`app.js`): Bulk watermark overlay with drag & drop, folder uploads, ZIP download.
 - **Creator** (`public/creator/`, 10 files): Watermark template builder using `window.Creator` namespace. 40 borders, badges, QR, diagonal text.
 - **BG Remover** (`public/remover/`, 10 files): AI background removal + manual tools. Uses bare `var` globals with lazy DOM init. Features: pre-mask (keep/remove brush, magic wand, edge-aware quick select with Sobel), AI → Refine flow, post-mask editor, compose mode, send to Annotator.
-- **Annotator** (`public/annotator/`, 4 files): Canvas-based text + image editor. Uses `ant`-prefixed `var` globals with lazy DOM init. Features: text objects with custom fonts/size/color, image drag/scale, snap guides, transparent PNG export.
+- **Annotator** (`public/annotator/`, 6 files): Canvas-based text + image editor. Uses `ant`-prefixed `var` globals. Features: text objects with custom fonts/size/color, image drag/scale, snap guides, global effects (drop shadow 360°, outer glow, text shadow), transparent PNG export, batch ZIP.
+- **BG Creator** (`public/bgcreator/`, 5 files): Background generator. Uses `bgc`-prefixed `var` globals. 3 modes (solid+texture, gradient+texture, pattern), 25 color palettes, 5 textures, 10 organic seeded patterns, 360° gradient picker, product image composite.
 - **Server** (`src/server.ts`): Bun + Sharp, serves static files and processes watermark API requests.
 - **Docs** (`docs/`): Mirror of `public/` with `./` relative paths for GitHub Pages.
 
@@ -19,6 +20,27 @@
 > Older entries archived in `progress-archive.log`.
 
 ---
+
+## 2026-05-09
+
+### BG Creator Tab (new) — v1.6.0
+- Created `public/bgcreator/` with 5 modules: `bgc-state.js`, `bgc-render.js`, `bgc-textures.js`, `bgc-patterns.js`, `bgc-controls.js`
+- 3 generation modes: Solid+Texture, Gradient+Texture, Pattern
+- 25 color palettes in 5 categories (Neutrals, Warm, Cool, Earth, Fashion) × 5 each
+- 5 canvas textures: paper_grain, linen, fine_noise, micro_dot, soft_canvas (with opacity + scale)
+- 10 organic patterns with seeded PRNG: polka_dot, diagonal_line, chevron, diamond_grid, crosshatch, scatter_dot, wave, hexagon, confetti, terrazzo
+- 360° circular gradient angle picker with drag interaction
+- Product image upload + composite (Apply to Image)
+- Client-side canvas rendering for live preview + full-size PNG export
+- Files: `bgc-state.js`, `bgc-render.js`, `bgc-textures.js`, `bgc-patterns.js`, `bgc-controls.js`
+
+### Annotator Global Effects
+- Added Effects section between Background and Templates in Annotator left panel
+- Drop Shadow: 360° direction picker, distance/blur/opacity sliders
+- Outer Glow: blur, color picker, opacity (destination-over composite)
+- Text Shadow: offsetY, blur, color
+- Effects applied in: live canvas render, single PNG export, batch ZIP export
+- Files: `annotator-state.js`, `annotator-render.js`, `annotator-controls.js`, `annotator-batch.js`
 
 ## 2026-05-04
 

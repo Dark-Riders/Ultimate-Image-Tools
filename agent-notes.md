@@ -20,7 +20,7 @@
 - Originally used `archiver` for ZIP, replaced with `jszip` for Bun stream compatibility
 
 ### Frontend
-- `public/index.html` — main HTML with **4-tab system** (Applier / Creator / BG Remover / Annotator)
+- `public/index.html` — main HTML with **5-tab system** (Applier / Creator / BG Remover / Annotator / BG Creator)
 - `public/app.js` — applier logic: file uploads, drag & drop, folder uploads, preview, ZIP download
 - `public/creator/` — watermark creator split into 10 modules via `window.Creator` namespace:
   - `creator-state.js` — global namespace, state object, undo/redo
@@ -48,7 +48,15 @@
   - `annotator-state.js` — state vars, DOM refs, `initAnnotatorDOM()` lazy init, undo
   - `annotator-render.js` — canvas rendering: checkerboard bg, image, text objects, selection handles, snap guides
   - `annotator-interact.js` — drag/drop, hit detection, snap guides, keyboard, touch events
-  - `annotator-controls.js` — image upload, text list CRUD, font picker, background selector, PNG export, bootstrap
+  - `annotator-controls.js` — image upload, text list CRUD, font picker, background selector, PNG export, effects listeners, bootstrap
+  - `annotator-batch.js` — batch navigation, queue UI, per-image texts, ZIP export
+  - `annotator-templates.js` — template save/load/delete/import/export
+- `public/bgcreator/` — BG Creator tab using bare `var` globals with `bgc` prefix:
+  - `bgc-state.js` — 25 palettes (5 categories), state vars, DOM refs, `initBgcDOM()` lazy init
+  - `bgc-render.js` — canvas preview: solid fill, gradient, product image composite
+  - `bgc-textures.js` — 5 texture generators (paper_grain, linen, fine_noise, micro_dot, soft_canvas)
+  - `bgc-patterns.js` — 10 organic patterns with seeded PRNG (mulberry32), jittered positions/sizes
+  - `bgc-controls.js` — palette grid, mode switching, 360° angle picker, image upload, export, bootstrap
 - `public/remover.js` — **DELETED** (was the original 966-line monolith)
 - `docs/` — mirror of `public/` with relative paths (`./`) for GitHub Pages deployment
 - `public/style.css` — premium dark-mode theme, all component styles
@@ -80,7 +88,9 @@
 - **Emoji rendering.** Some emojis (e.g. 🪄) render as squares on certain platforms. Use Unicode symbols (◇, ⬡) instead for toolbar buttons.
 - **Sobel edge map.** `preMaskEdgeMap` is pre-computed once in `enterPreMask()` and used by `quickSelectAt()`. Must be cleaned up in `exitPreMask()`. The edge threshold scales inversely with tolerance.
 - **Keyboard shortcuts.** `[` `]` brush size ±5, `{` `}` tolerance ±5, `Ctrl+Z` undo. Only active in mask/premask editor mode.
-- **Global prefix convention.** Creator uses `window.Creator` namespace. Remover uses bare `var` with implicit `rm`/`remover` prefix. Annotator uses bare `var` with `ant` prefix. Never overlap.
+- **Global prefix convention.** Creator uses `window.Creator` namespace. Remover uses bare `var` with implicit `rm`/`remover` prefix. Annotator uses bare `var` with `ant` prefix. BG Creator uses bare `var` with `bgc` prefix. Never overlap.
+- **Annotator effects.** Drop shadow uses 360° angle-to-XY offset math. Outer glow uses `destination-over` composite. Effects applied in render, single export, and batch export.
+- **BG Creator patterns.** Seeded PRNG (mulberry32) ensures reproducible organic patterns. Jitter ranges (position, size, rotation, omission) create non-tiled appearance. Regenerate button randomizes seed.
 
 ## Open Questions
 - None currently.

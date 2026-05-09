@@ -32,6 +32,21 @@ var antSNAP_THRESHOLD = 8;
 var antBgType = 'transparent'; // 'transparent' | 'white' | 'black' | 'color'
 var antBgColor = '#ffffff';
 
+// Global Effects
+var antFxShadow = false;
+var antFxShadowAngle = 270;     // 360° direction (270° = below)
+var antFxShadowDist = 8;
+var antFxShadowBlur = 20;
+var antFxShadowOpacity = 30;    // 0-100
+var antFxGlow = false;
+var antFxGlowBlur = 10;
+var antFxGlowColor = '#ffffff';
+var antFxGlowOpacity = 15;      // 0-100
+var antFxTextShadow = false;
+var antFxTShadowY = 2;
+var antFxTShadowBlur = 4;
+var antFxTShadowColor = '#000000';
+
 // Undo
 var antHistory = [];
 
@@ -73,6 +88,15 @@ var antBatchCounter = null;
 var antQueueList = null;
 var antExportAllBtn = null;
 
+// Effects DOM refs
+var antFxShadowChk = null, antFxShadowAnglePicker = null, antFxShadowAngleVal = null;
+var antFxShadowDistSlider = null, antFxShadowBlurSlider = null, antFxShadowOpacitySlider = null;
+var antFxShadowControls = null;
+var antFxGlowChk = null, antFxGlowBlurSlider = null, antFxGlowColorPicker = null, antFxGlowOpacitySlider = null;
+var antFxGlowControls = null;
+var antFxTShadowChk = null, antFxTShadowYSlider = null, antFxTShadowBlurSlider = null, antFxTShadowColorPicker = null;
+var antFxTShadowControls = null;
+
 function initAnnotatorDOM() {
     antCanvas = document.getElementById('annotator-canvas');
     if (!antCanvas) { console.warn('[Annotator] Canvas not found'); return; }
@@ -106,6 +130,25 @@ function initAnnotatorDOM() {
     antBatchCounter = document.getElementById('ant-batch-counter');
     antQueueList = document.getElementById('ant-queue-list');
     antExportAllBtn = document.getElementById('ant-export-all');
+
+    // Effects DOM refs
+    antFxShadowChk = document.getElementById('ant-fx-shadow');
+    antFxShadowControls = document.getElementById('ant-fx-shadow-controls');
+    antFxShadowAnglePicker = document.getElementById('ant-fx-shadow-angle');
+    antFxShadowAngleVal = document.getElementById('ant-fx-shadow-angle-val');
+    antFxShadowDistSlider = document.getElementById('ant-fx-shadow-dist');
+    antFxShadowBlurSlider = document.getElementById('ant-fx-shadow-blur');
+    antFxShadowOpacitySlider = document.getElementById('ant-fx-shadow-opacity');
+    antFxGlowChk = document.getElementById('ant-fx-glow');
+    antFxGlowControls = document.getElementById('ant-fx-glow-controls');
+    antFxGlowBlurSlider = document.getElementById('ant-fx-glow-blur');
+    antFxGlowColorPicker = document.getElementById('ant-fx-glow-color');
+    antFxGlowOpacitySlider = document.getElementById('ant-fx-glow-opacity');
+    antFxTShadowChk = document.getElementById('ant-fx-textshadow');
+    antFxTShadowControls = document.getElementById('ant-fx-textshadow-controls');
+    antFxTShadowYSlider = document.getElementById('ant-fx-tshadow-y');
+    antFxTShadowBlurSlider = document.getElementById('ant-fx-tshadow-blur');
+    antFxTShadowColorPicker = document.getElementById('ant-fx-tshadow-color');
 
     console.log('[Annotator] DOM refs initialized. ✅');
 }
