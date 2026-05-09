@@ -246,18 +246,46 @@ function initAnnotatorListeners() {
             ectx.fillStyle = colors[antBgType] || '#ffffff';
             ectx.fillRect(0, 0, antCanvasW, antCanvasH);
         }
-        // Image
+        // Image with effects
         if (antImage && antImage.el) {
+            ectx.save();
+            if (antFxShadow) {
+                var rad = (antFxShadowAngle - 90) * Math.PI / 180;
+                ectx.shadowOffsetX = Math.cos(rad) * antFxShadowDist;
+                ectx.shadowOffsetY = Math.sin(rad) * antFxShadowDist;
+                ectx.shadowBlur = antFxShadowBlur;
+                ectx.shadowColor = 'rgba(0,0,0,' + (antFxShadowOpacity / 100) + ')';
+            }
             ectx.drawImage(antImage.el, antImage.x, antImage.y, antImage.w, antImage.h);
+            ectx.restore();
+            if (antFxGlow) {
+                ectx.save();
+                ectx.globalCompositeOperation = 'destination-over';
+                var gr = parseInt(antFxGlowColor.slice(1, 3), 16);
+                var gg = parseInt(antFxGlowColor.slice(3, 5), 16);
+                var gb = parseInt(antFxGlowColor.slice(5, 7), 16);
+                ectx.shadowColor = 'rgba(' + gr + ',' + gg + ',' + gb + ',' + (antFxGlowOpacity / 100) + ')';
+                ectx.shadowBlur = antFxGlowBlur;
+                ectx.drawImage(antImage.el, antImage.x, antImage.y, antImage.w, antImage.h);
+                ectx.restore();
+            }
         }
-        // Texts
+        // Texts with effects
         for (var i = 0; i < antTexts.length; i++) {
             var t = antTexts[i];
             var style = (t.italic ? 'italic ' : '') + (t.bold ? 'bold ' : '');
+            ectx.save();
             ectx.font = style + t.fontSize + 'px "' + t.fontFamily + '", sans-serif';
             ectx.fillStyle = t.color;
             ectx.textBaseline = 'top';
+            if (antFxTextShadow) {
+                ectx.shadowOffsetX = 0;
+                ectx.shadowOffsetY = antFxTShadowY;
+                ectx.shadowBlur = antFxTShadowBlur;
+                ectx.shadowColor = antFxTShadowColor;
+            }
             ectx.fillText(t.text || 'Text', t.x, t.y);
+            ectx.restore();
         }
 
         exportCanvas.toBlob(function (blob) {
@@ -272,6 +300,9 @@ function initAnnotatorListeners() {
         antSelectedType = prevType; antSelectedIndex = prevIdx;
         antRender();
     });
+
+    // ===== Effects Listeners =====
+    antInitEffectsListeners();
 
     // Template system (from annotator-templates.js)
     initAnnotatorTemplateListeners();
@@ -294,6 +325,126 @@ function initAnnotatorListeners() {
     antUpdateBatchUI();
 
     console.log('[Annotator] ✅ All listeners attached.');
+}
+
+// ===== Effects System Listeners =====
+function antInitEffectsListeners() {
+    if (!antFxShadowChk) return; // Effects DOM not present
+
+    // Helper: update sibling value display for sliders
+    function updateSliderVal(slider) {
+        var valSpan = slider.parentElement.querySelector('.bgc-slider-val');
+        if (valSpan) {
+            var suffix = slider.id.includes('opacity') ? '%' : '';
+            valSpan.textContent = slider.value + suffix;
+        }
+    }
+
+    // Drop Shadow
+    antFxShadowChk.addEventListener('change', function () {
+        antFxShadow = this.checked;
+        antFxShadowControls.hidden = !this.checked;
+        antRender();
+    });
+    antFxShadowDistSlider.addEventListener('input', function () {
+        antFxShadowDist = parseInt(this.value); updateSliderVal(this); antRender();
+    });
+    antFxShadowBlurSlider.addEventListener('input', function () {
+        antFxShadowBlur = parseInt(this.value); updateSliderVal(this); antRender();
+    });
+    antFxShadowOpacitySlider.addEventListener('input', function () {
+        antFxShadowOpacity = parseInt(this.value); updateSliderVal(this); antRender();
+    });
+
+    // Shadow angle picker (reuse BG Creator angle picker pattern)
+    if (antFxShadowAnglePicker) {
+        var shadowAngleDragging = false;
+
+        function antFxShadowAngleFromMouse(e) {
+            var rect = antFxShadowAnglePicker.getBoundingClientRect();
+            var cx = rect.left + rect.width / 2;
+            var cy = rect.top + rect.height / 2;
+            var dx = (e.clientX || e.pageX) - cx;
+            var dy = (e.clientY || e.pageY) - cy;
+            var angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+            if (angle < 0) angle += 360;
+            return Math.round(angle) % 360;
+        }
+
+        function antFxUpdateShadowHandle() {
+            var handle = antFxShadowAnglePicker.querySelector('.bgc-angle-handle');
+            if (!handle) return;
+            var rad = (antFxShadowAngle - 90) * Math.PI / 180;
+            var r = 12; // radius for 40px picker
+            var hx = 20 + Math.cos(rad) * r - 4;
+            var hy = 20 + Math.sin(rad) * r - 4;
+            handle.style.left = hx + 'px';
+            handle.style.top = hy + 'px';
+            if (antFxShadowAngleVal) antFxShadowAngleVal.textContent = Math.round(antFxShadowAngle) + '°';
+        }
+
+        antFxShadowAnglePicker.addEventListener('mousedown', function (e) {
+            shadowAngleDragging = true;
+            antFxShadowAngle = antFxShadowAngleFromMouse(e);
+            antFxUpdateShadowHandle(); antRender();
+        });
+        document.addEventListener('mousemove', function (e) {
+            if (!shadowAngleDragging) return;
+            antFxShadowAngle = antFxShadowAngleFromMouse(e);
+            antFxUpdateShadowHandle(); antRender();
+        });
+        document.addEventListener('mouseup', function () { shadowAngleDragging = false; });
+
+        // Touch
+        antFxShadowAnglePicker.addEventListener('touchstart', function (e) {
+            e.preventDefault(); shadowAngleDragging = true;
+            antFxShadowAngle = antFxShadowAngleFromMouse(e.touches[0]);
+            antFxUpdateShadowHandle(); antRender();
+        });
+        document.addEventListener('touchmove', function (e) {
+            if (!shadowAngleDragging) return;
+            antFxShadowAngle = antFxShadowAngleFromMouse(e.touches[0]);
+            antFxUpdateShadowHandle(); antRender();
+        });
+        document.addEventListener('touchend', function () { shadowAngleDragging = false; });
+
+        // Set initial handle position
+        antFxUpdateShadowHandle();
+    }
+
+    // Outer Glow
+    antFxGlowChk.addEventListener('change', function () {
+        antFxGlow = this.checked;
+        antFxGlowControls.hidden = !this.checked;
+        antRender();
+    });
+    antFxGlowBlurSlider.addEventListener('input', function () {
+        antFxGlowBlur = parseInt(this.value); updateSliderVal(this); antRender();
+    });
+    antFxGlowColorPicker.addEventListener('input', function () {
+        antFxGlowColor = this.value; antRender();
+    });
+    antFxGlowOpacitySlider.addEventListener('input', function () {
+        antFxGlowOpacity = parseInt(this.value); updateSliderVal(this); antRender();
+    });
+
+    // Text Shadow
+    antFxTShadowChk.addEventListener('change', function () {
+        antFxTextShadow = this.checked;
+        antFxTShadowControls.hidden = !this.checked;
+        antRender();
+    });
+    antFxTShadowYSlider.addEventListener('input', function () {
+        antFxTShadowY = parseInt(this.value); updateSliderVal(this); antRender();
+    });
+    antFxTShadowBlurSlider.addEventListener('input', function () {
+        antFxTShadowBlur = parseInt(this.value); updateSliderVal(this); antRender();
+    });
+    antFxTShadowColorPicker.addEventListener('input', function () {
+        antFxTShadowColor = this.value; antRender();
+    });
+
+    console.log('[Annotator] Effects listeners attached. ✅');
 }
 
 // ===== Bootstrap =====

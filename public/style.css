@@ -2206,3 +2206,32 @@ input[type="number"]:focus {
   pointer-events: none;
   opacity: 0.8;
 }
+
+/* ==================== ANNOTATOR EFFECTS ==================== */
+
+.ant-effect-group {
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+}
+
+.ant-fx-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.ant-fx-label input[type="checkbox"] {
+  accent-color: var(--primary);
+}
+
+.ant-effect-controls {
+  margin-top: 6px;
+  padding-left: 4px;
+}
