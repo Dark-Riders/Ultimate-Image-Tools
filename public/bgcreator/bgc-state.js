@@ -77,7 +77,6 @@ var bgcSizeSelect = null;
 var bgcDownloadBtn = null, bgcApplyBtn = null;
 var bgcDropzone = null, bgcFileInput = null, bgcBrowseLink = null;
 var bgcImageInfo = null, bgcClearImageBtn = null;
-var bgcGhostSilhouette = null;
 
 function initBgcDOM() {
     bgcCanvas = document.getElementById('bgc-canvas');
@@ -117,7 +116,6 @@ function initBgcDOM() {
     bgcBrowseLink = document.getElementById('bgc-browse-link');
     bgcImageInfo = document.getElementById('bgc-image-info');
     bgcClearImageBtn = document.getElementById('bgc-clear-image');
-    bgcGhostSilhouette = document.getElementById('bgc-ghost');
 
     console.log('[BG Creator] DOM refs initialized.', bgcCanvas ? '✅' : '❌ canvas missing');
 }

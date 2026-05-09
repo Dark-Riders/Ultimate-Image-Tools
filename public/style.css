@@ -2195,18 +2195,6 @@ input[type="number"]:focus {
   margin: auto;
 }
 
-/* Ghost Silhouette */
-.bgc-ghost {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40%;
-  height: auto;
-  pointer-events: none;
-  opacity: 0.8;
-}
-
 /* ==================== ANNOTATOR EFFECTS ==================== */
 
 .ant-effect-group {

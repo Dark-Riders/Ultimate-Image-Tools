@@ -189,7 +189,6 @@ function bgcLoadProductImage(file) {
             bgcClearImageBtn.hidden = false;
             bgcApplyBtn.disabled = false;
             bgcApplyBtn.style.opacity = '1';
-            if (bgcGhostSilhouette) bgcGhostSilhouette.style.display = 'none';
             bgcRender();
         };
         img.src = e.target.result;
@@ -320,7 +319,6 @@ function initBgcListeners() {
         bgcClearImageBtn.hidden = true;
         bgcApplyBtn.disabled = true;
         bgcApplyBtn.style.opacity = '0.5';
-        if (bgcGhostSilhouette) bgcGhostSilhouette.style.display = '';
         bgcRender();
     });
 
